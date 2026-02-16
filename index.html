@@ -61,7 +61,10 @@
             <button class="nav-btn" onclick="show('admin')">Admin</button>
         </div>
     </nav>
+
     <div class="toast" id="toast">✅ Salvo!</div>
+
+    <!-- HOME -->
     <div id="home" class="page active">
         <div class="container">
             <h1>Fazer Pedido</h1>
@@ -106,15 +109,19 @@
                     <button type="submit" class="submit-btn">📨 ENVIAR PEDIDO</button>
                 </form>
             </div>
+
             <div class="stats">
                 <div class="stat-box"><div class="num" id="s-total">0</div><div>Total</div></div>
                 <div class="stat-box"><div class="num" id="s-done">0</div><div>Disponíveis</div></div>
                 <div class="stat-box"><div class="num" id="s-wait">0</div><div>Pendentes</div></div>
             </div>
+
             <h2 style="color:#ff6b00;margin:20px 0">🔥 Recentes</h2>
             <div class="movies-grid" id="recent-list"></div>
         </div>
     </div>
+
+    <!-- REQUESTS -->
     <div id="requests" class="page">
         <h1>Meus Pedidos</h1>
         <table>
@@ -123,6 +130,8 @@
         </table>
         <p id="req-empty" style="text-align:center;padding:40px;color:#666;display:none">Nenhum pedido 😢</p>
     </div>
+
+    <!-- ADMIN -->
     <div id="admin" class="page">
         <div id="adm-login" class="login-card">
             <h2>🔐 Admin</h2>
@@ -148,26 +157,173 @@
             <div id="adm-list"></div>
         </div>
     </div>
+
     <script>
-        let pedidos=JSON.parse(localStorage.getItem('arena_v5'))||[{id:1,nome:"O Poderoso Chefão",ano:"1972",genero:"Drama",status:"completed",poster:"https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",data:"17/02/2024"},{id:2,nome:"Interestelar",ano:"2014",genero:"Ficção Científica",status:"watching",poster:"https://m.media-amazon.com/images/M/MV5BZjdkOTU3MDktN2IxOS00OGEyLWFmMjktY2FiMmZkNWIyODZiXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg",data:"17/02/2024"},{id:3,nome:"Parasita",ano:"2019",genero:"Suspense",status:"pending",poster:"https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3Mjc2N5Q5NjBmXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_.jpg",data:"16/02/2024"}];
-        let logado=false;
-        let filtro='all';
-        window.onload=function(){save();updateAll()};
-        function save(){localStorage.setItem('arena_v5',JSON.stringify(pedidos))}
-        function show(p){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(p).classList.add('active');if(p=='requests')showReq();if(p=='admin'&&logado)showAdmin()}
-        function loadImg(i){let f=i.files[0];if(!f)return;if(f.size>5*1024*1024){toast('Arquivo grande! Max 5MB');return}let r=new FileReader();r.onload=function(e){document.getElementById('f-poster').value=e.target.result;document.getElementById('preview-img').src=e.target.result;document.getElementById('preview-box').style.display='block';document.querySelector('.upload-box').style.display='none';toast('Imagem ok!')};r.readAsDataURL(f)}
-        document.getElementById('f-url').addEventListener('change',function(){let u=this.value.trim();if(u&&u.startsWith('http')){document.getElementById('f-poster').value=u;document.getElementById('preview-img').src=u;document.getElementById('preview-box').style.display='block';document.querySelector('.upload-box').style.display='none'}});
-        function clearImg(){document.getElementById('f-poster').value='';document.getElementById('preview-box').style.display='none';document.querySelector('.upload-box').style.display='block';document.getElementById('f-file').value='';document.getElementById('f-url').value=''}
-        function saveRequest(){let p=document.getElementById('f-poster').value;if(!p){toast('Adicione capa!');return false}pedidos.unshift({id:Date.now(),nome:document.getElementById('f-name').value,ano:document.getElementById('f-year').value,genero:document.getElementById('f-genero').value,poster:p,status:'pending',data:new Date().toLocaleDateString('pt-BR')});save();document.querySelector('form').reset();clearImg();toast('Pedido enviado!');updateAll();return false}
-        function updateAll(){document.getElementById('s-total').textContent=pedidos.length;document.getElementById('s-done').textContent=pedidos.filter(x=>x.status=='completed').length;document.getElementById('s-wait').textContent=pedidos.filter(x=>x.status=='pending').length;let h='';pedidos.slice(0,6).forEach(p=>{h+=`<div class="movie-card"><img src="${p.poster}" onerror="this.src='https://via.placeholder.com/300x400/333/fff?text=?'"><div class="movie-info"><strong>${p.nome}</strong><br><span style="color:#888;font-size:12px">${p.genero}</span><br>${badge(p.status)}</div></div>`});document.getElementById('recent-list').innerHTML=h||'<p style="color:#666;text-align:center">Nenhum pedido</p>'}
-        function showReq(){let b=document.getElementById('req-list'),e=document.getElementById('req-empty');if(!pedidos.length){b.innerHTML='';e.style.display='block';return}e.style.display='none';let h='';pedidos.forEach(p=>{h+=`<tr><td><img src="${p.poster}" style="width:50px;height:75px;object-fit:cover;border-radius:5px" onerror="this.src='https://via.placeholder.com/50x75/333/fff?text=?'"></td><td>${p.nome}${p.ano?'<br><small style="color:#888">'+p.ano+'</small>':''}</td><td style="color:#888">${p.genero}</td><td>${badge(p.status)}</td><td style="color:#888;font-size:12px">${p.data}</td></tr>`});b.innerHTML=h}
-        function badge(s){let b={pending:'<span class="badge pending">⏳ Pendente</span>',watching:'<span class="badge watching">▶️ Análise</span>',completed:'<span class="badge completed">✅ OK</span>',rejected:'<span class="badge rejected">❌ Não</span>'};return b[s]||s}
-        function doLogin(){if(document.getElementById('adm-pass').value=='admin123'){logado=true;document.getElementById('adm-login').style.display='none';document.getElementById('adm-panel').style.display='block';showAdmin();toast('Bem-vindo Admin!')}else{document.getElementById('login-err').style.display='block'}}
-        function showAdmin(){document.getElementById('a-total').textContent=pedidos.length;document.getElementById('a-pend').textContent=pedidos.filter(x=>x.status=='pending').length;document.getElementById('a-prog').textContent=pedidos.filter(x=>x.status=='watching').length;document.getElementById('a-done').textContent=pedidos.filter(x=>x.status=='completed').length;let f=filtro=='all'?pedidos:pedidos.filter(x=>x.status==filtro);let h='';f.forEach(p=>{h+=`<div class="admin-item"><img src="${p.poster}" onerror="this.src='https://via.placeholder.com/80x120/333/fff?text=?'"><div style="flex:1"><strong>${p.nome}</strong><p style="color:#888;font-size:12px">${p.ano||'Sem ano'} • ${p.genero} • ${p.data}</p>${badge(p.status)}<div class="admin-actions"><button class="status-btn" onclick="setStat(${p.id},'pending')" style="border-color:#f59e0b;color:#f59e0b">Pendente</button><button class="status-btn" onclick="setStat(${p.id},'watching')" style="border-color:#3b82f6;color:#3b82f6">Progresso</button><button class="status-btn" onclick="setStat(${p.id},'completed')" style="border-color:#10b981;color:#10b981">OK</button><button class="status-btn" onclick="setStat(${p.id},'rejected')" style="border-color:#ef4444;color:#ef4444">Não</button><button class="status-btn delete" onclick="del(${p.id})">🗑️ Excluir</button></div></div></div>`});document.getElementById('adm-list').innerHTML=h||'<p style="color:#666;text-align:center;padding:40px">Nada aqui</p>'}
-        function setTab(t,b){filtro=t;document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');showAdmin()}
-        function setStat(id,st){let p=pedidos.find(x=>x.id==id);if(p){p.status=st;save();updateAll();showAdmin();toast('Status ok!')}}
-        function del(id){if(confirm('Excluir?')){pedidos=pedidos.filter(x=>x.id!=id);save();updateAll();showAdmin();toast('Excluído!')}}
-        function toast(m){let t=document.getElementById('toast');t.textContent='✅ '+m;t.style.display='block';setTimeout(()=>t.style.display='none',3000)}
+                // DADOS
+        let pedidos = JSON.parse(localStorage.getItem('arena_v4')) || [
+            {id:1,nome:"O Poderoso Chefão",ano:"1972",genero:"Drama",status:"completed",poster:"https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",data:"17/02/2024"},
+            {id:2,nome:"Interestelar",ano:"2014",genero:"Ficção Científica",status:"watching",poster:"https://m.media-amazon.com/images/M/MV5BZjdkOTU3MDktN2IxOS00OGEyLWFmMjktY2FiMmZkNWIyODZiXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg",data:"17/02/2024"},
+            {id:3,nome:"Parasita",ano:"2019",genero:"Suspense",status:"pending",poster:"https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3Mjc2N5Q5NjBmXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_.jpg",data:"16/02/2024"}
+        ];
+        let logado = false;
+        let filtro = 'all';
+
+        // INICIO
+        window.onload = function(){
+            save();
+            updateAll();
+        };
+
+        function save(){
+            localStorage.setItem('arena_v4',JSON.stringify(pedidos));
+        }
+
+        // NAVEGAÇÃO
+        function show(p){
+            document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+            document.getElementById(p).classList.add('active');
+            if(p=='requests') showReq();
+            if(p=='admin' && logado) showAdmin();
+        }
+
+        // FORMULÁRIO
+        function loadImg(i){
+            let f=i.files[0];
+            if(!f)return;
+            if(f.size>5*1024*1024){toast('Arquivo grande! Max 5MB');return;}
+            let r=new FileReader();
+            r.onload=function(e){
+                document.getElementById('f-poster').value=e.target.result;
+                document.getElementById('preview-img').src=e.target.result;
+                document.getElementById('preview-box').style.display='block';
+                document.querySelector('.upload-box').style.display='none';
+                toast('Imagem ok!');
+            };
+            r.readAsDataURL(f);
+        }
+
+        document.getElementById('f-url').addEventListener('change',function(){
+            let u=this.value.trim();
+            if(u&&u.startsWith('http')){
+                document.getElementById('f-poster').value=u;
+                document.getElementById('preview-img').src=u;
+                document.getElementById('preview-box').style.display='block';
+                document.querySelector('.upload-box').style.display='none';
+            }
+        });
+
+        function clearImg(){
+            document.getElementById('f-poster').value='';
+            document.getElementById('preview-box').style.display='none';
+            document.querySelector('.upload-box').style.display='block';
+            document.getElementById('f-file').value='';
+            document.getElementById('f-url').value='';
+        }
+
+        function saveRequest(){
+            let p=document.getElementById('f-poster').value;
+            if(!p){toast('Adicione capa!');return false;}
+            pedidos.unshift({
+                id:Date.now(),
+                nome:document.getElementById('f-name').value,
+                ano:document.getElementById('f-year').value,
+                genero:document.getElementById('f-genero').value,
+                poster:p,
+                status:'pending',
+                data:new Date().toLocaleDateString('pt-BR')
+            });
+            save();
+            document.querySelector('form').reset();
+            clearImg();
+            toast('Pedido enviado!');
+            updateAll();
+            return false;
+        }
+
+        // ATUALIZAR
+        function updateAll(){
+            document.getElementById('s-total').textContent=pedidos.length;
+            document.getElementById('s-done').textContent=pedidos.filter(x=>x.status=='completed').length;
+            document.getElementById('s-wait').textContent=pedidos.filter(x=>x.status=='pending').length;
+            
+            let h='';
+            pedidos.slice(0,6).forEach(p=>{
+                h+=`<div class="movie-card"><img src="${p.poster}" onerror="this.src='https://via.placeholder.com/300x400/333/fff?text=?'"><div class="movie-info"><strong>${p.nome}</strong><br><span style="color:#888;font-size:12px">${p.genero}</span><br>${badge(p.status)}</div></div>`;
+            });
+            document.getElementById('recent-list').innerHTML=h||'<p style="color:#666;text-align:center">Nenhum pedido</p>';
+        }
+
+        function showReq(){
+            let b=document.getElementById('req-list'),e=document.getElementById('req-empty');
+            if(!pedidos.length){b.innerHTML='';e.style.display='block';return;}
+            e.style.display='none';
+            let h='';
+            pedidos.forEach(p=>{
+                h+=`<tr><td><img src="${p.poster}" style="width:50px;height:75px;object-fit:cover;border-radius:5px" onerror="this.src='https://via.placeholder.com/50x75/333/fff?text=?'"></td><td>${p.nome}${p.ano?'<br><small style="color:#888">'+p.ano+'</small>':''}</td><td style="color:#888">${p.genero}</td><td>${badge(p.status)}</td><td style="color:#888;font-size:12px">${p.data}</td></tr>`;
+            });
+            b.innerHTML=h;
+        }
+
+        function badge(s){
+            let b={pending:'<span class="badge pending">⏳ Pendente</span>',watching:'<span class="badge watching">▶️ Análise</span>',completed:'<span class="badge completed">✅ OK</span>',rejected:'<span class="badge rejected">❌ Não</span>'};
+            return b[s]||s;
+        }
+
+        // ADMIN
+        function doLogin(){
+            if(document.getElementById('adm-pass').value=='admin123'){
+                logado=true;
+                document.getElementById('adm-login').style.display='none';
+                document.getElementById('adm-panel').style.display='block';
+                showAdmin();
+                toast('Bem-vindo Admin!');
+            }else{
+                document.getElementById('login-err').style.display='block';
+            }
+        }
+
+        function showAdmin(){
+            document.getElementById('a-total').textContent=pedidos.length;
+            document.getElementById('a-pend').textContent=pedidos.filter(x=>x.status=='pending').length;
+            document.getElementById('a-prog').textContent=pedidos.filter(x=>x.status=='watching').length;
+            document.getElementById('a-done').textContent=pedidos.filter(x=>x.status=='completed').length;
+            
+            let f=filtro=='all'?pedidos:pedidos.filter(x=>x.status==filtro);
+            let h='';
+            f.forEach(p=>{
+                h+=`<div class="admin-item"><img src="${p.poster}" onerror="this.src='https://via.placeholder.com/80x120/333/fff?text=?'"><div style="flex:1"><strong>${p.nome}</strong><p style="color:#888;font-size:12px">${p.ano||'Sem ano'} • ${p.genero} • ${p.data}</p>${badge(p.status)}<div class="admin-actions"><button class="status-btn" onclick="setStat(${p.id},'pending')" style="border-color:#f59e0b;color:#f59e0b">Pendente</button><button class="status-btn" onclick="setStat(${p.id},'watching')" style="border-color:#3b82f6;color:#3b82f6">Progresso</button><button class="status-btn" onclick="setStat(${p.id},'completed')" style="border-color:#10b981;color:#10b981">OK</button><button class="status-btn" onclick="setStat(${p.id},'rejected')" style="border-color:#ef4444;color:#ef4444">Não</button><button class="status-btn delete" onclick="del(${p.id})">🗑️ Excluir</button></div></div></div>`;
+            });
+            document.getElementById('adm-list').innerHTML=h||'<p style="color:#666;text-align:center;padding:40px">Nada aqui</p>';
+        }
+
+        function setTab(t,b){
+            filtro=t;
+            document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+            b.classList.add('active');
+            showAdmin();
+        }
+
+        function setStat(id,st){
+            let p=pedidos.find(x=>x.id==id);
+            if(p){p.status=st;save();updateAll();showAdmin();toast('Status ok!');}
+        }
+
+        function del(id){
+            if(confirm('Excluir?')){
+                pedidos=pedidos.filter(x=>x.id!=id);
+                save();
+                updateAll();
+                showAdmin();
+                toast('Excluído!');
+            }
+        }
+
+        function toast(m){
+            let t=document.getElementById('toast');
+            t.textContent='✅ '+m;
+            t.style.display='block';
+            setTimeout(()=>t.style.display='none',3000);
+        }
     </script>
 </body>
 </html>
