@@ -753,4 +753,756 @@
                     <i class="fas fa-home"></i> Início
                 </button>
                 <button class="nav-btn" onclick="goTo('requests')">
-                    <i cla
+                    <i class="fas fa-list"></i> Pedidos
+                </button>
+                <button class="nav-btn admin" onclick="goTo('admin')">
+                    <i class="fas fa-lock"></i> Admin
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- PÁGINA: HOME -->
+    <div id="page-home" class="page active">
+        <div class="container">
+            <div class="hero">
+                <h1>Qual filme você quer<br><span>assistir hoje?</span></h1>
+                <p>Preencha os dados do filme e adicione uma capa. Nossa equipe atualiza o catálogo baseado nas suas solicitações.</p>
+            </div>
+
+            <div class="form-card">
+                <form id="form-pedido" onsubmit="return enviarPedido(event)">
+                    <div class="form-row">
+                        <div>
+                            <div class="form-group">
+                                <label>Nome do Filme *</label>
+                                <input type="text" id="inp-nome" required placeholder="Ex: Inception">
+                            </div>
+                            <div class="form-group">
+                                <label>Ano</label>
+                                <input type="number" id="inp-ano" placeholder="2010">
+                            </div>
+                            <div class="form-group">
+                                <label>Gênero *</label>
+                                <select id="inp-genero" required>
+                                    <option value="">Selecione um gênero</option>
+                                    <option>Ação</option>
+                                    <option>Aventura</option>
+                                    <option>Comédia</option>
+                                    <option>Drama</option>
+                                    <option>Ficção Científica</option>
+                                    <option>Terror</option>
+                                    <option>Romance</option>
+                                    <option>Animação</option>
+                                    <option>Documentário</option>
+                                    <option>Suspense</option>
+                                    <option>Fantasia</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="form-group">
+                                <label>Capa do Filme *</label>
+                                <input type="file" id="inp-arquivo" accept="image/*" style="display: none;" onchange="carregarImagem(this)">
+                                <input type="url" id="inp-url" placeholder="Ou cole o link da imagem" style="margin-bottom: 10px;">
+                                <div class="upload-box" onclick="document.getElementById('inp-arquivo').click()">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>Clique para selecionar imagem</p>
+                                    <small>JPG, PNG ou GIF (máx 5MB)</small>
+                                </div>
+                                <div class="preview-box" id="box-preview">
+                                    <img id="img-preview" src="">
+                                    <button type="button" class="remove-btn" onclick="removerImagem()">×</button>
+                                </div>
+                                <input type="hidden" id="inp-poster" required>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-paper-plane"></i> Enviar Pedido
+                    </button>
+                </form>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <i class="fas fa-film" style="color: #ff6b00;"></i>
+                    <div class="number" id="stat-total">0</div>
+                    <div class="label">Filmes Pedidos</div>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-check-circle" style="color: #10b981;"></i>
+                    <div class="number" id="stat-prontos">0</div>
+                    <div class="label">Disponíveis</div>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-clock" style="color: #3b82f6;"></i>
+                    <div class="number" id="stat-espera">0</div>
+                    <div class="label">Em Análise</div>
+                </div>
+            </div>
+
+            <h2 class="section-title">
+                <i class="fas fa-fire"></i> Pedidos Recentes
+            </h2>
+            <div class="movies-grid" id="lista-recentes">
+                <div class="empty-state" style="grid-column: 1/-1;">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Carregando...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PÁGINA: MEUS PEDIDOS -->
+    <div id="page-requests" class="page">
+        <div class="container">
+            <h1 style="text-align: center; margin-bottom: 30px; font-size: 2.5rem;">Meus Pedidos</h1>
+            <div class="table-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Capa</th>
+                            <th>Filme</th>
+                            <th>Gênero</th>
+                            <th>Status</th>
+                            <th>Data</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-pedidos"></tbody>
+                </table>
+                <div class="empty-state" id="vazio-pedidos" style="display: none;">
+                    <i class="fas fa-inbox"></i>
+                    <p>Você ainda não fez nenhum pedido</p>
+                    <button onclick="goTo('home')" class="nav-btn admin" style="margin-top: 20px;">
+                        Fazer primeiro pedido
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PÁGINA: ADMIN -->
+    <div id="page-admin" class="page">
+        <div class="container">
+            <!-- Login -->
+            <div id="admin-login" class="login-card">
+                <i class="fas fa-shield-alt"></i>
+                <h2>Acesso Administrativo</h2>
+                <p>Digite a senha para acessar o painel de controle</p>
+                <input type="password" id="inp-senha" placeholder="Senha">
+                <button onclick="fazerLogin()">Entrar</button>
+                <p class="error-text" id="login-erro">Senha incorreta!</p>
+            </div>
+
+            <!-- Dashboard -->
+            <div id="admin-dash" style="display: none;">
+                <div class="admin-header">
+                    <h1><i class="fas fa-chart-line" style="color: #ff6b00;"></i> Painel de Controle</h1>
+                    <button onclick="fazerLogout()" class="nav-btn" style="border: 1px solid rgba(255,255,255,0.2);">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </button>
+                </div>
+
+                <div class="admin-stats">
+                    <div class="admin-stat total">
+                        <i class="fas fa-film" style="color: #ff6b00;"></i>
+                        <div class="num" id="adm-total">0</div>
+                        <div class="lbl">Total</div>
+                    </div>
+                    <div class="admin-stat pending">
+                        <i class="fas fa-clock" style="color: #f59e0b;"></i>
+                        <div class="num" id="adm-pendentes">0</div>
+                        <div class="lbl">Pendentes</div>
+                    </div>
+                    <div class="admin-stat watching">
+                        <i class="fas fa-play" style="color: #3b82f6;"></i>
+                        <div class="num" id="adm-andamento">0</div>
+                        <div class="lbl">Em Progresso</div>
+                    </div>
+                    <div class="admin-stat completed">
+                        <i class="fas fa-check" style="color: #10b981;"></i>
+                        <div class="num" id="adm-prontos">0</div>
+                        <div class="lbl">Completados</div>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab active" onclick="mudarAba('all', this)">Todos os Pedidos</button>
+                    <button class="tab" onclick="mudarAba('pending', this)">Pendentes</button>
+                    <button class="tab" onclick="mudarAba('watching', this)">Em Progresso</button>
+                    <button class="tab" onclick="mudarAba('completed', this)">Completados</button>
+                    <button class="tab" onclick="mudarAba('rejected', this)">Rejeitados</button>
+                </div>
+
+                <div id="admin-lista"></div>
+                <div class="empty-state" id="admin-vazio" style="display: none;">
+                    <i class="fas fa-inbox"></i>
+                    <p>Nenhum pedido nesta categoria</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============== DADOS ==============
+        let pedidos = [];
+        let adminLogado = false;
+        let abaAtual = 'all';
+        const CHAVE_STORAGE = 'arena_pedidos_dados_v1';
+
+        // ============== INICIALIZAÇÃO ==============
+        window.onload = function() {
+            console.log('🎬 ARENA PEDIDOS - Iniciando...');
+            carregarDados();
+            atualizarTudo();
+            
+            // Verificar se já está logado
+            if (sessionStorage.getItem('admin_logado') === 'sim') {
+                adminLogado = true;
+            }
+        };
+
+        // ============== STORAGE ==============
+        function carregarDados() {
+            try {
+                let salvos = localStorage.getItem(CHAVE_STORAGE);
+                if (salvos) {
+                    pedidos = JSON.parse(salvos);
+                    console.log('✅ Dados carregados:', pedidos.length, 'pedidos');
+                } else {
+                    // Criar dados iniciais de demonstração
+                    pedidos = [
+                        {
+                            id: 17082024001,
+                            nome: "O Poderoso Chefão",
+                            ano: "1972",
+                            genero: "Drama",
+                            status: "completed",
+                            poster: "https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
+                            data: "17/02/2024"
+                        },
+                        {
+                            id: 17082024002,
+                            nome: "Interestelar",
+                            ano: "2014",
+                            genero: "Ficção Científica",
+                            status: "watching",
+                            poster: "https://m.media-amazon.com/images/M/MV5BZjdkOTU3MDktN2IxOS00OGEyLWFmMjktY2FiMmZkNWIyODZiXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg",
+                            data: "17/02/2024"
+                        },
+                        {
+                            id: 17082024003,
+                            nome: "Parasita",
+                            ano: "2019",
+                            genero: "Suspense",
+                            status: "pending",
+                            poster: "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3Mjc2N5Q5NjBmXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_.jpg",
+                            data: "16/02/2024"
+                        }
+                    ];
+                    salvarDados();
+                }
+            } catch (erro) {
+                console.error('❌ Erro ao carregar:', erro);
+                pedidos = [];
+            }
+        }
+
+        function salvarDados() {
+            try {
+                localStorage.setItem(CHAVE_STORAGE, JSON.stringify(pedidos));
+            } catch (erro) {
+                console.error('❌ Erro ao salvar:', erro);
+            }
+        }
+
+        // ============== NAVEGAÇÃO ==============
+        function goTo(pagina) {
+            console.log('➡️ Navegando para:', pagina);
+            
+            // Esconder todas as páginas
+            document.querySelectorAll('.page').forEach(p => {
+                p.classList.remove('active');
+            });
+            
+            // Mostrar página selecionada
+            document.getElementById('page-' + pagina).classList.add('active');
+            
+            // Atualizar conteúdo específico
+            if (pagina === 'requests') {
+                renderizarTabela();
+            } else if (pagina === 'admin') {
+                if (adminLogado) {
+                    mostrarDashboard();
+                } else {
+                    mostrarLogin();
+                }
+            }
+            
+            // Scroll para topo
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ============== FORMULÁRIO ==============
+        function carregarImagem(input) {
+            let arquivo = input.files[0];
+            if (!arquivo) return;
+            
+            if (arquivo.size > 5 * 1024 * 1024) {
+                mostrarToast('❌ Arquivo muito grande! Máximo 5MB');
+                return;
+            }
+            
+            let leitor = new FileReader();
+            leitor.onload = function(e) {
+                document.getElementById('inp-poster').value = e.target.result;
+                document.getElementById('img-preview').src = e.target.result;
+                document.getElementById('box-preview').style.display = 'block';
+                document.querySelector('.upload-box').style.display = 'none';
+                mostrarToast('✅ Imagem carregada!');
+            };
+            leitor.readAsDataURL(arquivo);
+        }
+
+        // URL da imagem
+        document.getElementById('inp-url').addEventListener('change', function() {
+            let url = this.value.trim();
+            if (url && url.startsWith('http')) {
+                document.getElementById('inp-poster').value = url;
+                document.getElementById('img-preview').src = url;
+                document.getElementById('box-preview').style.display = 'block';
+                document.querySelector('.upload-box').style.display = 'none';
+            }
+        });
+
+        function removerImagem() {
+            document.getElementById('inp-poster').value = '';
+            document.getElementById('box-preview').style.display = 'none';
+            document.querySelector('.upload-box').style.display = 'block';
+            document.getElementById('inp-arquivo').value = '';
+            document.getElementById('inp-url').value = '';
+        }
+
+        function enviarPedido(evento) {
+            evento.preventDefault();
+            
+            let poster = document.getElementById('inp-poster').value;
+            if (!poster) {
+                mostrarToast('❌ Adicione uma capa para o filme!');
+                return false;
+            }
+            
+            let pedido = {
+                id: Date.now(),
+                nome: document.getElementById('inp-nome').value,
+                ano: document.getElementById('inp-ano').value,
+                genero: document.getElementById('inp-genero').value,
+                poster: poster,
+                status: 'pending',
+                data: new Date().toLocaleDateString('pt-BR')
+            };
+            
+            pedidos.unshift(pedido);
+            salvarDados();
+            
+            // Limpar formulário
+            document.getElementById('form-pedido').reset();
+            removerImagem();
+            
+            mostrarToast('✅ Pedido enviado com sucesso!');
+            atualizarTudo();
+            
+            return false;
+        }
+
+        // ============== RENDERIZAÇÃO ==============
+        function atualizarTudo() {
+            // Estatísticas
+            document.getElementById('stat-total').textContent = pedidos.length;
+            document.getElementById('stat-prontos').textContent = pedidos.filter(p => p.status === 'completed').length;
+            document.getElementById('stat-espera').textContent = pedidos.filter(p => p.status === 'pending').length;
+            
+            // Recentes
+            let recentes = pedidos.slice(0, 6);
+            let html = '';
+            
+            if (recentes.length === 0) {
+                html = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <i class="fas fa-film"></i>
+                        <p>Nenhum pedido ainda. Seja o primeiro!</p>
+                    </div>
+                `;
+            } else {
+                recentes.forEach(p => {
+                    html += `
+                        <div class="movie-card">
+                            <div class="movie-poster">
+                                <img src="${p.poster}" onerror="this.src='https://via.placeholder.com/300x450/1a1a2e/ffffff?text=Sem+Capa'" alt="${p.nome}">
+                                <div class="movie-overlay">
+                                    <h3>${p.nome}</h3>
+                                    ${p.ano ? `<p>${p.ano}</p>` : ''}
+                                    ${getBadge(p.status)}
+                                </div>
+                            </div>
+                            <div class="movie-info">
+                                <span>${p.genero}</span>
+                                <span>${p.data}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            document.getElementById('lista-recentes').innerHTML = html;
+        }
+
+        function renderizarTabela() {
+            let tbody = document.getElementById('tabela-pedidos');
+            let vazio = document.getElementById('vazio-pedidos');
+            
+            if (pedidos.length === 0) {
+                tbody.innerHTML = '';
+                vazio.style.display = 'block';
+                return;
+            }
+            
+            vazio.style.display = 'none';
+            let html = '';
+            
+            pedidos.forEach(p => {
+                html += `
+                    <tr>
+                        <td>
+                            <img src="${p.poster}" style="width: 50px; height: 75px; object-fit: cover; border-radius: 5px;" 
+                                 onerror="this.src='https://via.placeholder.com/50x75/1a1a2e/ffffff?text=?'">
+                        </td>
+                        <td>
+                            <strong>${p.nome}</strong>
+                            ${p.ano ? `<br><small style="color: #888;">${p.ano}</small>` : ''}
+                        </td>
+                        <td style="color: #888;">${p.genero}</td>
+                        <td>${getBadge(p.status)}</td>
+                        <td style="color: #888; font-size: 0.85rem;">${p.data}</td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+        }
+
+        function getBadge(status) {
+            const badges = {
+                pending: '<span class="badge pending"><i class="fas fa-clock"></i> Pendente</span>',
+                watching: '<span class="badge watching"><i class="fas fa-play"></i> Em Análise</span>',
+                completed: '<span class="badge completed"><i class="fas fa-check"></i> Disponível</span>',
+                rejected: '<span class="badge rejected"><i class="fas fa-times"></i> Indisponível</span>'
+            };
+            return badges[status] || status;
+        }
+
+        // ============== ADMIN ==============
+        function fazerLogin() {
+            let senha = document.getElementById('inp-senha').value;
+            if (senha === 'admin123') {
+                adminLogado = true;
+                sessionStorage.setItem('admin_logado', 'sim');
+                document.getElementById('login-erro').style.display = 'none';
+                mostrarDashboard();
+                mostrarToast('✅ Bem-vindo, Administrador!');
+            } else {
+                document.getElementById('login-erro').style.display = 'block';
+            }
+        }
+
+        function fazerLogout() {
+            adminLogado = false;
+            sessionStorage.removeItem('admin_logado');
+            mostrarLogin();
+        }
+
+        function mostrarLogin() {
+            document.getElementById('admin-login').style.display = 'block';
+            document.getElementById('admin-dash').style.display = 'none';
+        }
+
+        function mostrarDashboard() {
+            document.getElementById('admin-login').style.display = 'none';
+            document.getElementById('admin-dash').style.display = 'block';
+            renderizarAdmin();
+        }
+
+        function renderizarAdmin() {
+            // Estatísticas
+            document.getElementById('adm-total').textContent = pedidos.length;
+            document.getElementById('adm-pendentes').textContent = pedidos.filter(p => p.status === 'pending').length;
+            document.getElementById('adm-andamento').textContent = pedidos.filter(p => p.status === 'watching').length;
+            document.getElementById('adm-prontos').textContent = pedidos.filter(p => p.status === 'completed').length;
+            
+            // Lista filtrada
+            let filtrados = abaAtual === 'all' ? pedidos : pedidos.filter(p => p.status === abaAtual);
+            let container = document.getElementById('admin-lista');
+            let vazio = document.getElementById('admin-vazio');
+            
+            if (filtrados.length === 0) {
+                container.innerHTML = '';
+                vazio.style.display = 'block';
+                return;
+            }
+            
+            vazio.style.display = 'none';
+            let html = '';
+            
+            filtrados.forEach(p => {
+                html += `
+                    <div class="admin-item">
+                        <img src="${p.poster}" onerror="this.src='https://via.placeholder.com/100x150/1a1a2e/ffffff?text=Sem+Capa'" alt="${p.nome}">
+                        <div class="admin-content">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
+                                <div>
+                                    <h3>${p.nome}</h3>
+                                    <p class="admin-meta">${p.ano || 'Sem ano'} • ${p.genero} • ${p.data} • ID: #${p.id.toString().slice(-6)}</p>
+                                </div>
+                                ${getBadge(p.status)}
+                            </div>
+                            <div class="admin-actions">
+                                <button class="btn-status pending ${p.status === 'pending' ? 'active' : ''}" onclick="alterarStatus(${p.id}, 'pending')">
+                                    <i class="fas fa-clock"></i> Pendente
+                                </button>
+                                <button class="btn-status watching ${p.status === 'watching' ? 'active' : ''}" onclick="alterarStatus(${p.id}, 'watching')">
+                                    <i class="fas fa-play"></i> Progresso
+                                </button>
+                                <button class="btn-status completed ${p.status === 'completed' ? 'active' : ''}" onclick="alterarStatus(${p.id}, 'completed')">
+                                    <i class="fas fa-check"></i> Completo
+                                </button>
+                                <button class="btn-status rejected ${p.status === 'rejected' ? 'active' : ''}" onclick="alterarStatus(${p.id}, 'rejected')">
+                                    <i class="fas fa-times"></i> Rejeitado
+                                </button>
+                                <button class="btn-delete" onclick="excluirPedido(${p.id})">
+                                    <i class="fas fa-trash"></i> Excluir
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function mudarAba(aba, botao) {
+            abaAtual = aba;
+            
+            // Atualizar tabs visuais
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            botao.classList.add('active');
+            
+            renderizarAdmin();
+        }
+
+        function alterarStatus(id, novoStatus) {
+            let pedido = pedidos.find(p => p.id === id);
+            if (pedido) {
+                pedido.status = novoStatus;
+                salvarDados();
+                atualizarTudo();
+                renderizarAdmin();
+                mostrarToast('✅ Status atualizado!');
+            }
+        }
+
+        function excluirPedido(id) {
+            if (confirm('⚠️ Tem certeza que deseja excluir este pedido permanentemente?')) {
+                pedidos = pedidos.filter(p => p.id !== id);
+                salvarDados();
+                atualizarTudo();
+                renderizarAdmin();
+                mostrarToast('🗑️ Pedido excluído!');
+            }
+        }
+
+        // ============== UTILITÁRIOS ==============
+        function mostrarToast(mensagem) {
+            let toast = document.getElementById('toast');
+            document.getElementById('toast-text').textContent = mensagem;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Debug
+        console.log('🎬 ARENA PEDIDOS v2.0 - Carregado!');
+    </script>
+</body>
+</html>
+        // DADOS
+        let pedidos = JSON.parse(localStorage.getItem('arena_v4')) || [
+            {id:1,nome:"O Poderoso Chefão",ano:"1972",genero:"Drama",status:"completed",poster:"https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",data:"17/02/2024"},
+            {id:2,nome:"Interestelar",ano:"2014",genero:"Ficção Científica",status:"watching",poster:"https://m.media-amazon.com/images/M/MV5BZjdkOTU3MDktN2IxOS00OGEyLWFmMjktY2FiMmZkNWIyODZiXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg",data:"17/02/2024"},
+            {id:3,nome:"Parasita",ano:"2019",genero:"Suspense",status:"pending",poster:"https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3Mjc2N5Q5NjBmXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_.jpg",data:"16/02/2024"}
+        ];
+        let logado = false;
+        let filtro = 'all';
+
+        // INICIO
+        window.onload = function(){
+            save();
+            updateAll();
+        };
+
+        function save(){
+            localStorage.setItem('arena_v4',JSON.stringify(pedidos));
+        }
+
+        // NAVEGAÇÃO
+        function show(p){
+            document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+            document.getElementById(p).classList.add('active');
+            if(p=='requests') showReq();
+            if(p=='admin' && logado) showAdmin();
+        }
+
+        // FORMULÁRIO
+        function loadImg(i){
+            let f=i.files[0];
+            if(!f)return;
+            if(f.size>5*1024*1024){toast('Arquivo grande! Max 5MB');return;}
+            let r=new FileReader();
+            r.onload=function(e){
+                document.getElementById('f-poster').value=e.target.result;
+                document.getElementById('preview-img').src=e.target.result;
+                document.getElementById('preview-box').style.display='block';
+                document.querySelector('.upload-box').style.display='none';
+                toast('Imagem ok!');
+            };
+            r.readAsDataURL(f);
+        }
+
+        document.getElementById('f-url').addEventListener('change',function(){
+            let u=this.value.trim();
+            if(u&&u.startsWith('http')){
+                document.getElementById('f-poster').value=u;
+                document.getElementById('preview-img').src=u;
+                document.getElementById('preview-box').style.display='block';
+                document.querySelector('.upload-box').style.display='none';
+            }
+        });
+
+        function clearImg(){
+            document.getElementById('f-poster').value='';
+            document.getElementById('preview-box').style.display='none';
+            document.querySelector('.upload-box').style.display='block';
+            document.getElementById('f-file').value='';
+            document.getElementById('f-url').value='';
+        }
+
+        function saveRequest(){
+            let p=document.getElementById('f-poster').value;
+            if(!p){toast('Adicione capa!');return false;}
+            pedidos.unshift({
+                id:Date.now(),
+                nome:document.getElementById('f-name').value,
+                ano:document.getElementById('f-year').value,
+                genero:document.getElementById('f-genero').value,
+                poster:p,
+                status:'pending',
+                data:new Date().toLocaleDateString('pt-BR')
+            });
+            save();
+            document.querySelector('form').reset();
+            clearImg();
+            toast('Pedido enviado!');
+            updateAll();
+            return false;
+        }
+
+        // ATUALIZAR
+        function updateAll(){
+            document.getElementById('s-total').textContent=pedidos.length;
+            document.getElementById('s-done').textContent=pedidos.filter(x=>x.status=='completed').length;
+            document.getElementById('s-wait').textContent=pedidos.filter(x=>x.status=='pending').length;
+            
+            let h='';
+            pedidos.slice(0,6).forEach(p=>{
+                h+=`<div class="movie-card"><img src="${p.poster}" onerror="this.src='https://via.placeholder.com/300x400/333/fff?text=?'"><div class="movie-info"><strong>${p.nome}</strong><br><span style="color:#888;font-size:12px">${p.genero}</span><br>${badge(p.status)}</div></div>`;
+            });
+            document.getElementById('recent-list').innerHTML=h||'<p style="color:#666;text-align:center">Nenhum pedido</p>';
+        }
+
+        function showReq(){
+            let b=document.getElementById('req-list'),e=document.getElementById('req-empty');
+            if(!pedidos.length){b.innerHTML='';e.style.display='block';return;}
+            e.style.display='none';
+            let h='';
+            pedidos.forEach(p=>{
+                h+=`<tr><td><img src="${p.poster}" style="width:50px;height:75px;object-fit:cover;border-radius:5px" onerror="this.src='https://via.placeholder.com/50x75/333/fff?text=?'"></td><td>${p.nome}${p.ano?'<br><small style="color:#888">'+p.ano+'</small>':''}</td><td style="color:#888">${p.genero}</td><td>${badge(p.status)}</td><td style="color:#888;font-size:12px">${p.data}</td></tr>`;
+            });
+            b.innerHTML=h;
+        }
+
+        function badge(s){
+            let b={pending:'<span class="badge pending">⏳ Pendente</span>',watching:'<span class="badge watching">▶️ Análise</span>',completed:'<span class="badge completed">✅ OK</span>',rejected:'<span class="badge rejected">❌ Não</span>'};
+            return b[s]||s;
+        }
+
+        // ADMIN
+        function doLogin(){
+            if(document.getElementById('adm-pass').value=='admin123'){
+                logado=true;
+                document.getElementById('adm-login').style.display='none';
+                document.getElementById('adm-panel').style.display='block';
+                showAdmin();
+                toast('Bem-vindo Admin!');
+            }else{
+                document.getElementById('login-err').style.display='block';
+            }
+        }
+
+        function showAdmin(){
+            document.getElementById('a-total').textContent=pedidos.length;
+            document.getElementById('a-pend').textContent=pedidos.filter(x=>x.status=='pending').length;
+            document.getElementById('a-prog').textContent=pedidos.filter(x=>x.status=='watching').length;
+            document.getElementById('a-done').textContent=pedidos.filter(x=>x.status=='completed').length;
+            
+            let f=filtro=='all'?pedidos:pedidos.filter(x=>x.status==filtro);
+            let h='';
+            f.forEach(p=>{
+                h+=`<div class="admin-item"><img src="${p.poster}" onerror="this.src='https://via.placeholder.com/80x120/333/fff?text=?'"><div style="flex:1"><strong>${p.nome}</strong><p style="color:#888;font-size:12px">${p.ano||'Sem ano'} • ${p.genero} • ${p.data}</p>${badge(p.status)}<div class="admin-actions"><button class="status-btn" onclick="setStat(${p.id},'pending')" style="border-color:#f59e0b;color:#f59e0b">Pendente</button><button class="status-btn" onclick="setStat(${p.id},'watching')" style="border-color:#3b82f6;color:#3b82f6">Progresso</button><button class="status-btn" onclick="setStat(${p.id},'completed')" style="border-color:#10b981;color:#10b981">OK</button><button class="status-btn" onclick="setStat(${p.id},'rejected')" style="border-color:#ef4444;color:#ef4444">Não</button><button class="status-btn delete" onclick="del(${p.id})">🗑️ Excluir</button></div></div></div>`;
+            });
+            document.getElementById('adm-list').innerHTML=h||'<p style="color:#666;text-align:center;padding:40px">Nada aqui</p>';
+        }
+
+        function setTab(t,b){
+            filtro=t;
+            document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+            b.classList.add('active');
+            showAdmin();
+        }
+
+        function setStat(id,st){
+            let p=pedidos.find(x=>x.id==id);
+            if(p){p.status=st;save();updateAll();showAdmin();toast('Status ok!');}
+        }
+
+        function del(id){
+            if(confirm('Excluir?')){
+                pedidos=pedidos.filter(x=>x.id!=id);
+                save();
+                updateAll();
+                showAdmin();
+                toast('Excluído!');
+            }
+        }
+
+        function toast(m){
+            let t=document.getElementById('toast');
+            t.textContent='✅ '+m;
+            t.style.display='block';
+            setTimeout(()=>t.style.display='none',3000);
+        }
+    </script>
+</body>
+</html>
