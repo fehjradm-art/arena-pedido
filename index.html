@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARENA PEDIDOS - Sistema de Pedidos de Filmes</title>
+    <title>ARENA PEDIDOS - Sistema de Pedidos de Filmes e Séries</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -260,6 +261,98 @@
         .form-group textarea {
             min-height: 100px;
             resize: vertical;
+        }
+
+        /* Upload de imagem */
+        .image-upload-container {
+            border: 2px dashed #333;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-upload-container:hover {
+            border-color: var(--primary);
+            background: rgba(255, 107, 53, 0.05);
+        }
+
+        .image-upload-container.has-image {
+            border-style: solid;
+            border-color: var(--success);
+            padding: 0;
+        }
+
+        .image-upload-input {
+            display: none;
+        }
+
+        .upload-placeholder {
+            color: #888;
+        }
+
+        .upload-placeholder-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .upload-preview {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .image-upload-container.has-image .upload-preview {
+            display: block;
+        }
+
+        .image-upload-container.has-image .upload-placeholder {
+            display: none;
+        }
+
+        .remove-image-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: none;
+            z-index: 10;
+        }
+
+        .image-upload-container.has-image .remove-image-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(0,0,0,0.3);
+            display: none;
+        }
+
+        .upload-progress-bar {
+            height: 100%;
+            background: var(--success);
+            width: 0%;
+            transition: width 0.3s ease;
         }
 
         .popular-movies {
@@ -694,6 +787,55 @@
             color: #666;
         }
 
+        /* Imagem no painel admin */
+        .order-image-thumb {
+            width: 60px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .order-image-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .image-modal.active {
+            display: flex;
+        }
+
+        .image-modal img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .image-modal-close {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            color: white;
+            font-size: 3rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
@@ -778,11 +920,16 @@
         </div>
     </div>
 
+    <div class="image-modal" id="imageModal" onclick="closeImageModal()">
+        <button class="image-modal-close">&times;</button>
+        <img id="modalImage" src="" alt="Capa do conteúdo">
+    </div>
+
     <div class="container">
         <section id="home" class="section active">
             <div class="hero">
-                <h1>🎬 Peça seu Filme</h1>
-                <p>Escolha um filme e faça seu pedido. Nossa equipe receberá em tempo real!</p>
+                <h1>🎬 Peça seu Conteúdo</h1>
+                <p>Escolha um filme ou série e faça seu pedido. Nossa equipe receberá em tempo real!</p>
             </div>
 
             <div class="order-form">
@@ -796,12 +943,12 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Nome do Filme *</label>
-                        <input type="text" id="movieName" required placeholder="Qual filme você quer assistir?">
+                        <label>Nome do Filme/Série *</label>
+                        <input type="text" id="movieName" required placeholder="Qual filme ou série você quer assistir?">
                     </div>
 
                     <div class="form-group">
-                        <label>Ano do Filme</label>
+                        <label>Ano de Lançamento</label>
                         <input type="number" id="movieYear" placeholder="Ex: 2024" min="1900" max="2030">
                     </div>
 
@@ -819,8 +966,27 @@
                             <option value="Horror">Horror/Terror</option>
                             <option value="Romance">Romance</option>
                             <option value="Suspense">Suspense</option>
+                            <option value="Série">Série</option>
+                            <option value="Minissérie">Minissérie</option>
                             <option value="Outro">Outro</option>
                         </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Capa do Filme/Série (Opcional)</label>
+                        <div class="image-upload-container" id="imageUploadContainer" onclick="document.getElementById('movieImage').click()">
+                            <input type="file" id="movieImage" class="image-upload-input" accept="image/*" onchange="handleImageSelect(event)">
+                            <div class="upload-placeholder">
+                                <div class="upload-placeholder-icon">🖼️</div>
+                                <p>Clique para enviar uma imagem da capa</p>
+                                <small style="color: #666;">JPG, PNG ou GIF (máx. 5MB)</small>
+                            </div>
+                            <img class="upload-preview" id="imagePreview" alt="Preview">
+                            <button type="button" class="remove-image-btn" onclick="removeImage(event)">×</button>
+                            <div class="upload-progress">
+                                <div class="upload-progress-bar" id="uploadProgressBar"></div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -891,15 +1057,16 @@
                             <th>ID</th>
                             <th>Horário</th>
                             <th>Cliente</th>
-                            <th>Filme</th>
+                            <th>Filme/Série</th>
                             <th>Gênero</th>
+                            <th>Capa</th>
                             <th>Status</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody id="ordersTableBody">
                         <tr>
-                            <td colspan="7" class="empty-state">
+                            <td colspan="8" class="empty-state">
                                 <div class="empty-state-icon">📭</div>
                                 <h3>Aguardando pedidos...</h3>
                                 <p>Quando alguém fizer um pedido, aparecerá aqui automaticamente!</p>
@@ -912,7 +1079,7 @@
     </div>
 
     <script>
-        // ===== CONFIGURAÇÃO FIREBASE - JÁ CONFIGURADO =====
+        // ===== CONFIGURAÇÃO FIREBASE =====
         const firebaseConfig = {
             apiKey: "AIzaSyAppo_nh_032I5etNVjZ7IeS8JXwf6POw",
             authDomain: "pedidos-arena.firebaseapp.com",
@@ -923,26 +1090,31 @@
             appId: "1:55419091930:web:66d5c2ecb566d5f260dee3"
         };
 
-        // Inicializa Firebase imediatamente
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        const storage = firebase.storage();
         const ordersRef = db.ref('arena-pedidos');
+        const imagesRef = storage.ref('movie-images');
 
         const ADMIN_PASSWORD = 'arena2024';
         let isAuthenticated = false;
         let currentFilter = 'all';
         let soundEnabled = true;
         let localOrders = [];
+        let selectedImageFile = null;
+        let selectedImageBase64 = null;
 
         const popularMovies = [
             { title: 'Duna: Parte 2', year: '2024', genre: 'Ficção Científica' },
-            { title: 'Oppenheimer', year: '2022023', genre: 'Drama' },
+            { title: 'Oppenheimer', year: '2023', genre: 'Drama' },
             { title: 'Poor Things', year: '2023', genre: 'Comédia/Drama' },
             { title: 'Wicked', year: '2024', genre: 'Musical' },
             { title: 'Gladiador 2', year: '2024', genre: 'Ação' },
             { title: 'Coringa 2', year: '2024', genre: 'Drama/Musical' },
             { title: 'Deadpool & Wolverine', year: '2024', genre: 'Ação' },
-            { title: 'Divertida Mente 2', year: '2024', genre: 'Animação' }
+            { title: 'Divertida Mente 2', year: '2024', genre: 'Animação' },
+            { title: 'The Last of Us', year: '2023', genre: 'Série' },
+            { title: 'House of the Dragon', year: '2022', genre: 'Série' }
         ];
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -969,7 +1141,6 @@
 
         function initFirebase() {
             try {
-                // Ouvir mudanças em tempo real
                 ordersRef.on('value', (snapshot) => {
                     const data = snapshot.val();
                     localOrders = data ? Object.entries(data).map(([key, value]) => ({...value, firebaseKey: key})) : [];
@@ -982,7 +1153,6 @@
                     }
                 });
 
-                // Ouvir novos pedidos (notificação)
                 ordersRef.limitToLast(1).on('child_added', (snapshot) => {
                     const order = snapshot.val();
                     if (order.timestamp > Date.now() - 5000) {
@@ -990,7 +1160,7 @@
                     }
                 });
 
-                showNotification('🟢 Conectado ao servidor! Pedidos em tempo real ativos.', 'success');
+                showNotification('🟢 Conectado ao servidor!', 'success');
             } catch (error) {
                 console.error('Erro Firebase:', error);
                 document.getElementById('connectionStatus').innerHTML = '<div class="status-dot" style="background: var(--warning);"></div><span>Erro</span>';
@@ -1002,18 +1172,90 @@
             document.getElementById('movieName').value = title;
             document.getElementById('movieYear').value = year;
             document.getElementById('movieGenre').value = genre;
-            showNotification('Filme selecionado! Complete seu pedido.', 'success');
+            showNotification('Conteúdo selecionado! Complete seu pedido.', 'success');
             document.querySelector('.order-form').scrollIntoView({ behavior: 'smooth' });
         }
 
-        function submitOrder(e) {
+        // ===== UPLOAD DE IMAGEM =====
+        function handleImageSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 5 * 1024 * 1024) {
+                showNotification('❌ Imagem muito grande! Máximo 5MB.', 'error');
+                return;
+            }
+
+            selectedImageFile = file;
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                selectedImageBase64 = e.target.result;
+                const preview = document.getElementById('imagePreview');
+                const container = document.getElementById('imageUploadContainer');
+                
+                preview.src = e.target.result;
+                container.classList.add('has-image');
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function removeImage(event) {
+            event.stopPropagation();
+            selectedImageFile = null;
+            selectedImageBase64 = null;
+            
+            document.getElementById('movieImage').value = '';
+            document.getElementById('imagePreview').src = '';
+            document.getElementById('imageUploadContainer').classList.remove('has-image');
+        }
+
+        async function uploadImage(file, orderId) {
+            if (!file) return null;
+            
+            try {
+                const fileName = `order_${orderId}_${Date.now()}.jpg`;
+                const fileRef = imagesRef.child(fileName);
+                
+                const snapshot = await fileRef.put(file);
+                const downloadURL = await snapshot.ref.getDownloadURL();
+                
+                return downloadURL;
+            } catch (error) {
+                console.error('Erro upload imagem:', error);
+                return null;
+            }
+        }
+
+        // ===== ENVIO DE PEDIDO =====
+        async function submitOrder(e) {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
             btn.innerHTML = '<div class="loading-spinner"></div> Enviando...';
             btn.disabled = true;
 
+            const orderId = Date.now();
+            const progressBar = document.getElementById('uploadProgressBar');
+            const progressContainer = document.querySelector('.upload-progress');
+
+            let imageUrl = null;
+            
+            if (selectedImageFile) {
+                progressContainer.style.display = 'block';
+                progressBar.style.width = '50%';
+                
+                imageUrl = await uploadImage(selectedImageFile, orderId);
+                
+                progressBar.style.width = '100%';
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    progressBar.style.width = '0%';
+                }, 500);
+            }
+
             const order = {
-                id: Date.now(),
+                id: orderId,
                 timestamp: Date.now(),
                 date: new Date().toLocaleString('pt-BR'),
                 customer: document.getElementById('customerName').value,
@@ -1021,6 +1263,7 @@
                 year: document.getElementById('movieYear').value || 'N/A',
                 genre: document.getElementById('movieGenre').value || 'Não especificado',
                 observations: document.getElementById('observations').value || 'Nenhuma',
+                imageUrl: imageUrl,
                 status: 'pending'
             };
 
@@ -1029,6 +1272,7 @@
                     btn.innerHTML = '🚀 Enviar Pedido';
                     btn.disabled = false;
                     document.getElementById('orderForm').reset();
+                    removeImage({ stopPropagation: () => {} });
                     showNotification('🎉 Pedido enviado com sucesso!', 'success');
                 })
                 .catch((error) => {
@@ -1054,6 +1298,7 @@
             }
         }
 
+        // ===== ADMIN =====
         function showSection(section) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             
@@ -1126,7 +1371,7 @@
             if (filtered.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="7" class="empty-state">
+                        <td colspan="8" class="empty-state">
                             <div class="empty-state-icon">📭</div>
                             <h3>Nenhum pedido ${currentFilter === 'all' ? 'ainda' : 'com este status'}</h3>
                             <p>${currentFilter === 'all' ? 'Aguardando novos pedidos...' : 'Tente outro filtro.'}</p>
@@ -1143,6 +1388,12 @@
                     <td><strong>${escapeHtml(order.customer)}</strong></td>
                     <td>${escapeHtml(order.movie)} ${order.year !== 'N/A' ? `(${order.year})` : ''}</td>
                     <td><span style="background: rgba(255,107,53,0.2); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">${order.genre}</span></td>
+                    <td>
+                        ${order.imageUrl ? 
+                            `<img src="${order.imageUrl}" class="order-image-thumb" onclick="openImageModal('${order.imageUrl}')" alt="Capa">` : 
+                            '<span style="color: #666; font-size: 0.85rem;">Sem imagem</span>'
+                        }
+                    </td>
                     <td><span class="status-badge status-${order.status}">${getStatusText(order.status)}</span></td>
                     <td>
                         <div class="action-btns">
@@ -1162,10 +1413,25 @@
                                 <span class="detail-label">ID:</span>
                                 <span class="detail-value">#${order.id}</span>
                             </div>
+                            ${order.imageUrl ? `
+                                <div class="detail-row">
+                                    <span class="detail-label">Imagem:</span>
+                                    <span class="detail-value"><a href="${order.imageUrl}" target="_blank" style="color: var(--primary);">Ver capa em tamanho real</a></span>
+                                </div>
+                            ` : ''}
                         </div>
                     </td>
                 </tr>
             `).join('');
+        }
+
+        function openImageModal(url) {
+            document.getElementById('modalImage').src = url;
+            document.getElementById('imageModal').classList.add('active');
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').classList.remove('active');
         }
 
         function toggleDetails(key) {
@@ -1181,6 +1447,16 @@
 
         function deleteOrder(key) {
             if (!confirm('⚠️ Tem certeza que deseja EXCLUIR este pedido permanentemente?')) return;
+            
+            const order = localOrders.find(o => o.firebaseKey === key);
+            if (order && order.imageUrl) {
+                // Extrair nome do arquivo da URL e deletar do Storage
+                try {
+                    const fileName = order.imageUrl.split('%2F').pop().split('?')[0];
+                    imagesRef.child(fileName).delete().catch(() => {});
+                } catch (e) {}
+            }
+            
             ordersRef.child(key).remove()
                 .then(() => showNotification('Pedido excluído!', 'warning'))
                 .catch(() => showNotification('Erro ao excluir', 'error'));
@@ -1192,6 +1468,10 @@
 
             ordersRef.remove()
                 .then(() => {
+                    // Limpar storage também
+                    imagesRef.listAll().then(result => {
+                        result.items.forEach(file => file.delete());
+                    });
                     showNotification('Todos os pedidos foram apagados!', 'warning');
                 })
                 .catch(() => showNotification('Erro ao limpar pedidos', 'error'));
