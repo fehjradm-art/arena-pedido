@@ -162,6 +162,11 @@
             color: var(--light);
         }
 
+        .btn-warning {
+            background: var(--warning);
+            color: var(--dark);
+        }
+
         .btn-glass {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -548,6 +553,29 @@
             border-color: var(--primary);
         }
 
+        /* Botão de recuperar pedido */
+        .recover-order-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: var(--card);
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            padding: 0.8rem 1.2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            z-index: 99;
+            box-shadow: var(--neon-blue);
+            animation: pulse 2s infinite;
+            display: none;
+        }
+
+        .recover-order-btn.show {
+            display: block;
+        }
+
         /* Admin Dashboard */
         .admin-header {
             display: flex;
@@ -874,7 +902,7 @@
             border-color: var(--primary);
         }
 
-        /* Modals - MOBILE OPTIMIZED */
+        /* Modals */
         .modal {
             display: none;
             position: fixed;
@@ -932,7 +960,6 @@
             margin-top: 0.3rem;
         }
 
-        /* Chat Modal - FULL SCREEN MOBILE */
         .chat-modal .modal-content {
             height: 85vh;
             max-height: 85vh;
@@ -1081,7 +1108,7 @@
             to { transform: rotate(360deg); }
         }
 
-        /* DESKTOP MEDIA QUERIES */
+        /* Desktop */
         @media (min-width: 768px) {
             .container {
                 padding: 2rem;
@@ -1206,9 +1233,14 @@
             .timeline-label {
                 font-size: 0.85rem;
             }
+
+            .recover-order-btn {
+                bottom: 30px;
+                left: 30px;
+                font-size: 0.9rem;
+            }
         }
 
-        /* TOUCH OPTIMIZATIONS */
         @media (hover: none) {
             .btn:hover::before {
                 display: none;
@@ -1219,17 +1251,14 @@
             }
         }
 
-        /* PREVENT TEXT SIZE ADJUSTMENT ON ORIENTATION CHANGE */
         html {
             -webkit-text-size-adjust: 100%;
         }
 
-        /* SMOOTH SCROLLING */
         * {
             scroll-behavior: smooth;
         }
 
-        /* HIDE SCROLLBAR BUT KEEP FUNCTIONALITY */
         .chat-messages::-webkit-scrollbar,
         .client-chat-messages::-webkit-scrollbar {
             width: 4px;
@@ -1252,6 +1281,11 @@
     </div>
 
     <div class="notification-container" id="notificationContainer"></div>
+
+    <!-- Botão de recuperar pedido -->
+    <button class="recover-order-btn" id="recoverOrderBtn" onclick="recoverMyOrder()">
+        📦 Ver Meu Pedido
+    </button>
 
     <audio id="notificationSound" preload="auto">
         <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE" type="audio/wav">
@@ -1433,9 +1467,13 @@
 
                     <!-- Status do Pedido -->
                     <div class="client-order-status" id="clientOrderStatus">
-                        <h3 style="font-family: 'Orbitron'; color: var(--success); margin-bottom: 1rem; font-size: 1.1rem;">
-                            📦 Seu Pedido
-                        </h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 style="font-family: 'Orbitron'; color: var(--success); font-size: 1.1rem;">
+                                📦 Meu Pedido
+                            </h3>
+                            <button class="btn btn-warning" onclick="clearMyOrder()" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;">🗑 Limpar</button>
+                        </div>
+                        
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                             <div style="flex: 1; min-width: 0;">
                                 <div style="font-size: 1rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="clientMovieTitle">-</div>
@@ -1569,6 +1607,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             initParticles();
             initFirebase();
+            checkSavedOrder(); // Verificar pedido salvo ao carregar
             setTimeout(() => {
                 document.getElementById('loadingOverlay').classList.add('hidden');
             }, 800);
@@ -1592,6 +1631,97 @@
                     playSound();
                 }
             });
+        }
+
+        // ===== VERIFICAR PEDIDO SALVO =====
+        function checkSavedOrder() {
+            const savedOrderId = localStorage.getItem('myOrderId');
+            const savedOrderData = localStorage.getItem('myOrderData');
+            
+            if (savedOrderId && savedOrderData) {
+                try {
+                    const orderData = JSON.parse(savedOrderData);
+                    myOrderId = savedOrderId;
+                    
+                    // Mostrar botão flutuante
+                    document.getElementById('recoverOrderBtn').classList.add('show');
+                    
+                    // Restaurar visualização automaticamente
+                    restoreClientOrder(orderData, myOrderId);
+                    
+                    // Iniciar listeners
+                    initClientChat(myOrderId);
+                    
+                    showNotification('Pedido Recuperado', 'Seu pedido anterior foi carregado!', 'success');
+                } catch (e) {
+                    console.error('Erro ao recuperar pedido:', e);
+                    clearOrderStorage();
+                }
+            }
+        }
+
+        function restoreClientOrder(order, orderId) {
+            const statusDiv = document.getElementById('clientOrderStatus');
+            statusDiv.classList.add('active');
+            
+            document.getElementById('clientMovieTitle').textContent = order.movie;
+            document.getElementById('clientOrderId').textContent = `#${orderId.substr(-6).toUpperCase()}`;
+            updateClientStatusUI(order.status || 'pending');
+            
+            // Scroll para o status após um momento
+            setTimeout(() => {
+                statusDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 500);
+        }
+
+        function recoverMyOrder() {
+            if (myOrderId) {
+                const statusDiv = document.getElementById('clientOrderStatus');
+                statusDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Recarregar dados atualizados do Firebase
+                ordersRef.child(myOrderId).once('value', (snapshot) => {
+                    const order = snapshot.val();
+                    if (order) {
+                        updateClientStatusUI(order.status);
+                        document.getElementById('clientMovieTitle').textContent = order.movie;
+                    }
+                });
+            }
+        }
+
+        function clearMyOrder() {
+            if (!confirm('Deseja remover o acompanhamento deste pedido? O pedido continuará no sistema.')) return;
+            
+            clearOrderStorage();
+            
+            // Esconder status
+            document.getElementById('clientOrderStatus').classList.remove('active');
+            document.getElementById('recoverOrderBtn').classList.remove('show');
+            
+            // Limpar chat
+            document.getElementById('clientChatMessages').innerHTML = '<div style="text-align: center; color: #666; padding: 1rem; font-size: 0.85rem;">Nenhuma mensagem ainda...</div>';
+            
+            // Remover listeners
+            if (chatListeners.client) {
+                chatsRef.child(chatListeners.client).off();
+                ordersRef.child(chatListeners.client).off();
+                delete chatListeners.client;
+            }
+            
+            myOrderId = null;
+            
+            showNotification('Limpo', 'Acompanhamento removido', 'info');
+        }
+
+        function clearOrderStorage() {
+            localStorage.removeItem('myOrderId');
+            localStorage.removeItem('myOrderData');
+        }
+
+        function saveOrderToStorage(orderId, orderData) {
+            localStorage.setItem('myOrderId', orderId);
+            localStorage.setItem('myOrderData', JSON.stringify(orderData));
         }
 
         // ===== PARTÍCULAS =====
@@ -1750,6 +1880,13 @@
             newOrderRef.set(orderData)
                 .then(() => {
                     myOrderId = newOrderRef.key;
+                    
+                    // Salvar no localStorage para persistência
+                    saveOrderToStorage(myOrderId, orderData);
+                    
+                    // Mostrar botão flutuante
+                    document.getElementById('recoverOrderBtn').classList.add('show');
+                    
                     showClientOrderStatus(orderData, myOrderId);
                     initClientChat(myOrderId);
                     
@@ -1815,19 +1952,30 @@
         function initClientChat(orderId) {
             if (chatListeners.client) {
                 chatsRef.child(chatListeners.client).off();
+                ordersRef.child(chatListeners.client).off();
             }
             
             chatListeners.client = orderId;
             
+            // Listener de mensagens
             chatsRef.child(orderId).on('value', (snapshot) => {
                 const messages = snapshot.val();
                 renderClientChat(messages);
             });
             
+            // Listener de status do pedido
             ordersRef.child(orderId).on('value', (snapshot) => {
                 const order = snapshot.val();
                 if (order) {
                     updateClientStatusUI(order.status);
+                    
+                    // Atualizar dados salvos
+                    const savedData = localStorage.getItem('myOrderData');
+                    if (savedData) {
+                        const parsed = JSON.parse(savedData);
+                        parsed.status = order.status;
+                        localStorage.setItem('myOrderData', JSON.stringify(parsed));
+                    }
                     
                     if (order.hasNewMessage && order.lastMessageSender === 'admin') {
                         showNotification('Nova Mensagem', 'Admin respondeu!', 'info');
@@ -1867,7 +2015,7 @@
             const message = {
                 text: text,
                 sender: 'user',
-                time: new Date().toLocaleTimeString('pt-BR'),
+                time: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}),
                 timestamp: Date.now()
             };
             
@@ -2002,7 +2150,7 @@
             `).join('');
         }
 
-        // ===== CHAT ADMIN - CORRIGIDO =====
+        // ===== CHAT ADMIN =====
         function openAdminChat(orderId) {
             currentChatOrderId = orderId;
             const order = localOrders.find(o => o.id === orderId);
@@ -2011,19 +2159,15 @@
             document.getElementById('chatOrderInfo').textContent = `#${orderId.substr(-6).toUpperCase()} - ${order.movie}`;
             document.getElementById('chatModal').classList.add('active');
             
-            // Limpar input
             document.getElementById('chatInput').value = '';
             document.getElementById('chatInput').focus();
             
-            // Carregar mensagens imediatamente
             loadAdminChatMessages(orderId);
             
-            // Remover listener anterior se existir
             if (chatListeners[orderId]) {
                 chatsRef.child(orderId).off('value', chatListeners[orderId]);
             }
             
-            // Criar novo listener
             const listener = chatsRef.child(orderId).on('value', (snapshot) => {
                 const messages = snapshot.val();
                 renderAdminChat(messages);
@@ -2031,7 +2175,6 @@
             
             chatListeners[orderId] = listener;
             
-            // Marcar como lido
             ordersRef.child(orderId).update({ hasNewMessage: false });
         }
 
@@ -2059,7 +2202,6 @@
                 </div>
             `).join('');
             
-            // Scroll automático para última mensagem
             container.scrollTop = container.scrollHeight;
         }
 
@@ -2076,10 +2218,8 @@
                 timestamp: Date.now()
             };
             
-            // Enviar mensagem
             chatsRef.child(currentChatOrderId).push(message)
                 .then(() => {
-                    // Atualizar flag no pedido
                     return ordersRef.child(currentChatOrderId).update({
                         hasNewMessage: true,
                         lastMessageSender: 'admin',
@@ -2091,7 +2231,6 @@
                     input.focus();
                 })
                 .catch((error) => {
-                    console.error('Erro ao enviar:', error);
                     showNotification('Erro', 'Não foi possível enviar mensagem', 'error');
                 });
         }
@@ -2099,7 +2238,6 @@
         function closeChat() {
             document.getElementById('chatModal').classList.remove('active');
             
-            // Remover listener específico
             if (currentChatOrderId && chatListeners[currentChatOrderId]) {
                 chatsRef.child(currentChatOrderId).off('value', chatListeners[currentChatOrderId]);
                 delete chatListeners[currentChatOrderId];
