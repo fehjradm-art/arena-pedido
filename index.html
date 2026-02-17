@@ -21,8 +21,8 @@
             --danger: #ff2a6d;
             --warning: #ffc107;
             --info: #00d4ff;
-            --neon-glow: 0 0 10px rgba(255, 107, 53, 0.5), 0 0 20px rgba(255, 107, 53, 0.3);
-            --neon-blue: 0 0 10px rgba(0, 212, 255, 0.5);
+            --neon-glow: 0 0 10px rgba(255, 107, 53, 0.3), 0 0 20px rgba(255, 107, 53, 0.1);
+            --neon-blue: 0 0 10px rgba(0, 212, 255, 0.3);
         }
 
         * {
@@ -47,17 +47,48 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
+        /* ANIMAÇÕES SUAVES */
+        @keyframes gentle-pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes soft-glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 107, 53, 0.2); }
+            50% { box-shadow: 0 0 15px rgba(255, 107, 53, 0.4); }
+        }
+
+        @keyframes slide-smooth {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes border-shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+
+        @keyframes gentle-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
         .scanlines {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.05) 50%, rgba(0,0,0,0.05));
             background-size: 100% 4px;
             z-index: 9999;
             pointer-events: none;
-            opacity: 0.3;
+            opacity: 0.15;
         }
 
         #particles-canvas {
@@ -70,15 +101,85 @@
             pointer-events: none;
         }
 
+        /* LETREIRO ELEGANTE E SUAVE */
+        .marquee-container {
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.05), transparent);
+            border-top: 1px solid rgba(255, 107, 53, 0.2);
+            border-bottom: 1px solid rgba(255, 107, 53, 0.2);
+            overflow: hidden;
+            position: relative;
+            padding: 0.6rem 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .marquee-container::before,
+        .marquee-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 80px;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .marquee-container::before {
+            left: 0;
+            background: linear-gradient(to right, var(--darker), transparent);
+        }
+
+        .marquee-container::after {
+            right: 0;
+            background: linear-gradient(to left, var(--darker), transparent);
+        }
+
+        .marquee-content {
+            display: flex;
+            animation: slide-smooth 30s linear infinite;
+            white-space: nowrap;
+        }
+
+        .marquee-content:hover {
+            animation-play-state: paused;
+        }
+
+        .marquee-item {
+            display: inline-flex;
+            align-items: center;
+            padding: 0 2.5rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+        }
+
+        .marquee-item:hover {
+            color: var(--primary);
+        }
+
+        .marquee-item .icon {
+            margin-right: 0.6rem;
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .marquee-divider {
+            color: rgba(255, 107, 53, 0.3);
+            margin: 0 0.5rem;
+        }
+
         header {
             background: rgba(10, 10, 15, 0.95);
             backdrop-filter: blur(10px);
             padding: 1rem;
-            border-bottom: 2px solid var(--primary);
+            border-bottom: 1px solid rgba(255, 107, 53, 0.3);
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: var(--neon-glow);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
         }
 
         .header-content {
@@ -94,12 +195,25 @@
         .logo {
             font-family: 'Orbitron', sans-serif;
             font-size: 1.5rem;
-            font-weight: 900;
-            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-transform: uppercase;
             letter-spacing: 2px;
+            position: relative;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            background-size: 200% 100%;
+            animation: border-shimmer 3s infinite;
         }
 
         .btn {
@@ -125,7 +239,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
             transition: left 0.5s;
         }
 
@@ -133,45 +247,27 @@
             left: 100%;
         }
 
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+        }
+
         .btn-primary {
             background: linear-gradient(45deg, var(--primary), var(--secondary));
             color: var(--light);
-            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
-            border: 1px solid var(--primary);
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+            border: 1px solid rgba(255, 107, 53, 0.5);
         }
 
         .btn-secondary {
             background: transparent;
-            border: 2px solid var(--accent);
+            border: 1px solid var(--accent);
             color: var(--accent);
         }
 
         .btn-secondary:hover {
-            background: var(--accent);
-            color: var(--dark);
-            box-shadow: var(--neon-blue);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: var(--dark);
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: var(--light);
-        }
-
-        .btn-warning {
-            background: var(--warning);
-            color: var(--dark);
-        }
-
-        .btn-glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: var(--light);
+            background: rgba(0, 212, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
         }
 
         .container {
@@ -182,7 +278,7 @@
 
         .section {
             display: none;
-            animation: fadeIn 0.5s ease;
+            animation: fade-in-up 0.5s ease;
             width: 100%;
         }
 
@@ -190,18 +286,13 @@
             display: block;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
         .hero {
             text-align: center;
             padding: 2rem 1rem;
-            background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(0, 212, 255, 0.05) 100%);
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.05) 0%, rgba(0, 212, 255, 0.03) 100%);
             border-radius: 15px;
             margin-bottom: 2rem;
-            border: 1px solid rgba(255, 107, 53, 0.3);
+            border: 1px solid rgba(255, 107, 53, 0.15);
         }
 
         .hero h1 {
@@ -209,11 +300,14 @@
             font-size: 1.8rem;
             margin-bottom: 0.5rem;
             line-height: 1.2;
+            background: linear-gradient(45deg, var(--light), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .hero p {
             font-size: 1rem;
-            color: #aaa;
+            color: rgba(255, 255, 255, 0.6);
         }
 
         .order-form-container {
@@ -227,9 +321,16 @@
             background: var(--card);
             padding: 1.5rem;
             border-radius: 15px;
-            border: 1px solid rgba(255, 107, 53, 0.3);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
             width: 100%;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .order-form:hover {
+            border-color: rgba(255, 107, 53, 0.2);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
         }
 
         .form-group {
@@ -242,7 +343,7 @@
             color: var(--accent);
             font-weight: 600;
             text-transform: uppercase;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             letter-spacing: 1px;
         }
 
@@ -251,8 +352,8 @@
         .form-group textarea {
             width: 100%;
             padding: 0.8rem;
-            background: rgba(0, 0, 0, 0.3);
-            border: 2px solid #333;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
             color: var(--light);
             font-size: 1rem;
@@ -265,7 +366,66 @@
         .form-group textarea:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 15px rgba(255, 107, 53, 0.3);
+            box-shadow: 0 0 10px rgba(255, 107, 53, 0.2);
+        }
+
+        /* TMDB Search Styles */
+        .tmdb-search-container {
+            position: relative;
+        }
+
+        .tmdb-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            animation: fade-in-up 0.2s ease;
+        }
+
+        .tmdb-results.active {
+            display: block;
+        }
+
+        .tmdb-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.2s;
+        }
+
+        .tmdb-item:hover {
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .tmdb-item img {
+            width: 45px;
+            height: 68px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 1rem;
+        }
+
+        .tmdb-item-info h4 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.95rem;
+            margin-bottom: 0.2rem;
+            color: var(--light);
+        }
+
+        .tmdb-item-info p {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
         }
 
         .priority-selector {
@@ -277,8 +437,8 @@
         .priority-option {
             flex: 1;
             padding: 0.8rem 0.5rem;
-            background: rgba(0, 0, 0, 0.3);
-            border: 2px solid #333;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
             text-align: center;
             cursor: pointer;
@@ -295,16 +455,11 @@
         .priority-option.urgent.selected {
             border-color: var(--danger);
             background: rgba(255, 42, 109, 0.1);
-            animation: pulse-urgent 2s infinite;
-        }
-
-        @keyframes pulse-urgent {
-            0%, 100% { box-shadow: 0 0 5px var(--danger); }
-            50% { box-shadow: 0 0 20px var(--danger); }
+            animation: gentle-pulse 2s infinite;
         }
 
         .image-upload-container {
-            border: 2px dashed #333;
+            border: 2px dashed rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             padding: 1.5rem;
             text-align: center;
@@ -312,12 +467,12 @@
             cursor: pointer;
             position: relative;
             overflow: hidden;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.1);
         }
 
         .image-upload-container:hover {
-            border-color: var(--primary);
-            background: rgba(255, 107, 53, 0.05);
+            border-color: rgba(255, 107, 53, 0.4);
+            background: rgba(255, 107, 53, 0.02);
         }
 
         .image-upload-container.has-image {
@@ -352,7 +507,7 @@
             font-size: 1.2rem;
             display: none;
             z-index: 10;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
 
         .image-upload-container.has-image .remove-image-btn {
@@ -365,8 +520,14 @@
             background: var(--card);
             padding: 1.5rem;
             border-radius: 15px;
-            border: 1px solid rgba(0, 212, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             width: 100%;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .preview-card:hover {
+            border-color: rgba(0, 212, 255, 0.2);
         }
 
         .preview-card h3 {
@@ -374,7 +535,8 @@
             color: var(--accent);
             margin-bottom: 1rem;
             text-align: center;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
         }
 
         .movie-poster-preview {
@@ -387,7 +549,7 @@
             justify-content: center;
             font-size: 3rem;
             margin-bottom: 1rem;
-            border: 2px solid rgba(255, 107, 53, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             position: relative;
             overflow: hidden;
         }
@@ -403,15 +565,15 @@
             background: var(--card);
             padding: 1.5rem;
             border-radius: 15px;
-            border: 1px solid rgba(0, 255, 136, 0.3);
+            border: 1px solid rgba(0, 255, 136, 0.2);
             margin-top: 1.5rem;
             display: none;
             width: 100%;
+            animation: fade-in-up 0.4s ease;
         }
 
         .client-order-status.active {
             display: block;
-            animation: slideIn 0.5s ease;
         }
 
         .status-timeline {
@@ -427,8 +589,8 @@
             top: 15px;
             left: 0;
             right: 0;
-            height: 3px;
-            background: #333;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
             z-index: 0;
         }
 
@@ -442,51 +604,53 @@
         }
 
         .timeline-dot {
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            background: #333;
-            border: 2px solid #555;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 0.9rem;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
         }
 
         .timeline-step.active .timeline-dot {
             background: var(--success);
             border-color: var(--success);
-            box-shadow: 0 0 15px var(--success);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
         }
 
         .timeline-step.current .timeline-dot {
             background: var(--primary);
             border-color: var(--primary);
-            box-shadow: 0 0 15px var(--primary);
-            animation: pulse 1s infinite;
+            box-shadow: 0 0 15px rgba(255, 107, 53, 0.4);
+            animation: gentle-pulse 2s infinite;
         }
 
         .timeline-label {
-            margin-top: 0.3rem;
+            margin-top: 0.4rem;
             font-size: 0.7rem;
-            color: #666;
+            color: rgba(255, 255, 255, 0.5);
             text-align: center;
+            font-family: 'Rajdhani', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .timeline-step.active .timeline-label,
         .timeline-step.current .timeline-label {
             color: var(--light);
-            font-weight: 600;
         }
 
         /* Chat do Cliente */
         .client-chat-container {
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.2);
             border-radius: 12px;
             padding: 1rem;
             margin-top: 1rem;
-            border: 1px solid rgba(255, 107, 53, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .client-chat-messages {
@@ -498,7 +662,7 @@
 
         .chat-message {
             margin-bottom: 0.8rem;
-            animation: fadeIn 0.3s;
+            animation: fade-in-up 0.3s;
         }
 
         .chat-message.admin {
@@ -507,7 +671,7 @@
 
         .chat-message-content {
             display: inline-block;
-            padding: 0.6rem 0.8rem;
+            padding: 0.6rem 0.9rem;
             border-radius: 12px;
             max-width: 85%;
             word-wrap: break-word;
@@ -515,7 +679,7 @@
         }
 
         .chat-message.user .chat-message-content {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
             border-bottom-left-radius: 4px;
         }
@@ -528,7 +692,7 @@
 
         .chat-message-time {
             font-size: 0.7rem;
-            color: #666;
+            color: rgba(255, 255, 255, 0.4);
             margin-top: 0.2rem;
         }
 
@@ -540,12 +704,13 @@
         .chat-input {
             flex: 1;
             padding: 0.7rem 1rem;
-            background: rgba(0, 0, 0, 0.3);
-            border: 2px solid #333;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
             color: var(--light);
             font-family: 'Rajdhani', sans-serif;
             font-size: 0.9rem;
+            transition: all 0.3s;
         }
 
         .chat-input:focus {
@@ -559,7 +724,7 @@
             bottom: 20px;
             left: 20px;
             background: var(--card);
-            border: 2px solid var(--accent);
+            border: 1px solid var(--accent);
             color: var(--accent);
             padding: 0.8rem 1.2rem;
             border-radius: 25px;
@@ -567,13 +732,19 @@
             font-family: 'Orbitron', sans-serif;
             font-size: 0.8rem;
             z-index: 99;
-            box-shadow: var(--neon-blue);
-            animation: pulse 2s infinite;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            animation: gentle-float 4s ease-in-out infinite;
             display: none;
+            backdrop-filter: blur(10px);
         }
 
         .recover-order-btn.show {
             display: block;
+        }
+
+        .recover-order-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
         }
 
         /* Admin Dashboard */
@@ -584,18 +755,15 @@
             margin-bottom: 1.5rem;
         }
 
-        .admin-header > div:first-child {
-            width: 100%;
-        }
-
         .admin-header h1 {
             font-family: 'Orbitron';
             color: var(--secondary);
             font-size: 1.5rem;
+            font-weight: 700;
         }
 
         .admin-header p {
-            color: #888;
+            color: rgba(255, 255, 255, 0.5);
             font-size: 0.9rem;
         }
 
@@ -606,11 +774,6 @@
             width: 100%;
         }
 
-        .admin-actions .btn {
-            flex: 1;
-            min-width: 100px;
-        }
-
         .live-indicator {
             display: flex;
             align-items: center;
@@ -618,31 +781,18 @@
             background: rgba(0, 255, 136, 0.1);
             padding: 0.4rem 0.8rem;
             border-radius: 20px;
-            border: 1px solid var(--success);
+            border: 1px solid rgba(0, 255, 136, 0.3);
             color: var(--success);
             font-family: 'Orbitron', sans-serif;
-            font-size: 0.8rem;
-            animation: pulse-border 2s infinite;
-            width: fit-content;
-        }
-
-        @keyframes pulse-border {
-            0%, 100% { box-shadow: 0 0 5px var(--success); }
-            50% { box-shadow: 0 0 20px var(--success); }
+            font-size: 0.75rem;
         }
 
         .live-dot {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             background: var(--success);
             border-radius: 50%;
-            animation: pulse-live 1.5s infinite;
-        }
-
-        @keyframes pulse-live {
-            0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(0, 255, 136, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+            animation: gentle-pulse 2s infinite;
         }
 
         .stats-dashboard {
@@ -654,27 +804,32 @@
 
         .stat-card {
             background: var(--card);
-            padding: 1rem;
+            padding: 1.2rem;
             border-radius: 12px;
-            border: 1px solid rgba(255, 107, 53, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             position: relative;
-            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(255, 107, 53, 0.2);
+            transform: translateY(-3px);
         }
 
         .stat-card h3 {
-            color: #888;
-            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.7rem;
             text-transform: uppercase;
-            margin-bottom: 0.3rem;
+            margin-bottom: 0.5rem;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
         }
 
         .stat-number {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: 700;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--primary);
         }
 
         .orders-grid {
@@ -686,23 +841,23 @@
 
         .order-card {
             background: var(--card);
-            border-radius: 15px;
-            border: 1px solid rgba(255, 107, 53, 0.2);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
             overflow: hidden;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             width: 100%;
         }
 
         .order-card:hover {
             transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            border-color: var(--primary);
+            border-color: rgba(255, 107, 53, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .order-card-header {
             padding: 1rem;
-            background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, transparent 100%);
-            border-bottom: 1px solid rgba(255, 107, 53, 0.2);
+            background: rgba(255, 107, 53, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             justify-content: space-between;
             align-items: start;
@@ -711,7 +866,7 @@
         .order-id {
             font-family: 'Orbitron', sans-serif;
             color: var(--accent);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
 
         .order-card-body {
@@ -723,6 +878,7 @@
             font-weight: 700;
             margin-bottom: 0.3rem;
             line-height: 1.3;
+            font-family: 'Rajdhani', sans-serif;
         }
 
         .order-customer {
@@ -734,7 +890,7 @@
         .order-image-container {
             width: 100%;
             height: 180px;
-            background: var(--dark);
+            background: rgba(0, 0, 0, 0.2);
             border-radius: 8px;
             overflow: hidden;
             margin-bottom: 0.8rem;
@@ -748,6 +904,10 @@
             transition: transform 0.3s;
         }
 
+        .order-image-container:hover img {
+            transform: scale(1.05);
+        }
+
         .order-meta {
             display: flex;
             gap: 0.5rem;
@@ -756,12 +916,12 @@
         }
 
         .order-observations {
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.2);
             padding: 0.8rem;
             border-radius: 8px;
             margin-bottom: 0.8rem;
             font-size: 0.85rem;
-            border-left: 3px solid var(--primary);
+            border-left: 2px solid var(--primary);
             max-height: 80px;
             overflow-y: auto;
         }
@@ -779,28 +939,29 @@
         .status-badge {
             padding: 0.3rem 0.8rem;
             border-radius: 20px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
             text-transform: uppercase;
             font-family: 'Orbitron', sans-serif;
+            letter-spacing: 0.5px;
         }
 
         .status-pending {
-            background: rgba(255, 193, 7, 0.2);
+            background: rgba(255, 193, 7, 0.15);
             color: var(--warning);
-            border: 1px solid var(--warning);
+            border: 1px solid rgba(255, 193, 7, 0.3);
         }
 
         .status-completed {
-            background: rgba(0, 255, 136, 0.2);
+            background: rgba(0, 255, 136, 0.15);
             color: var(--success);
-            border: 1px solid var(--success);
+            border: 1px solid rgba(0, 255, 136, 0.3);
         }
 
         .status-cancelled {
-            background: rgba(255, 42, 109, 0.2);
+            background: rgba(255, 42, 109, 0.15);
             color: var(--danger);
-            border: 1px solid var(--danger);
+            border: 1px solid rgba(255, 42, 109, 0.3);
         }
 
         .order-actions {
@@ -817,7 +978,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s;
+            transition: all 0.2s;
             font-size: 1rem;
         }
 
@@ -835,13 +996,13 @@
         .btn-chat.has-new::after {
             content: '';
             position: absolute;
-            top: -4px;
-            right: -4px;
-            width: 10px;
-            height: 10px;
+            top: -2px;
+            right: -2px;
+            width: 8px;
+            height: 8px;
             background: var(--danger);
             border-radius: 50%;
-            animation: pulse 1s infinite;
+            animation: gentle-pulse 1.5s infinite;
         }
 
         .filters-container {
@@ -855,30 +1016,25 @@
             display: flex;
             gap: 0.4rem;
             flex-wrap: wrap;
-            overflow-x: auto;
-            padding-bottom: 0.5rem;
-            -webkit-overflow-scrolling: touch;
         }
 
         .filter-btn {
             padding: 0.5rem 1rem;
             background: var(--card);
-            border: 2px solid #333;
-            color: var(--light);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
             border-radius: 20px;
             cursor: pointer;
             transition: all 0.3s;
             font-family: 'Orbitron', sans-serif;
             font-size: 0.75rem;
-            white-space: nowrap;
-            flex-shrink: 0;
         }
 
         .filter-btn:hover,
         .filter-btn.active {
             background: var(--primary);
             border-color: var(--primary);
-            box-shadow: 0 0 15px rgba(255, 107, 53, 0.4);
+            color: var(--light);
         }
 
         .search-container {
@@ -890,11 +1046,12 @@
             width: 100%;
             padding: 0.7rem 1rem 0.7rem 2.5rem;
             background: var(--card);
-            border: 2px solid #333;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 25px;
             color: var(--light);
             font-family: 'Rajdhani', sans-serif;
             font-size: 0.9rem;
+            transition: all 0.3s;
         }
 
         .search-input:focus {
@@ -910,7 +1067,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.95);
+            background: rgba(0, 0, 0, 0.9);
             z-index: 1000;
             justify-content: center;
             align-items: flex-end;
@@ -925,39 +1082,28 @@
             background: var(--card);
             padding: 1.5rem;
             border-radius: 20px 20px 0 0;
-            border: 2px solid var(--primary);
+            border: 1px solid rgba(255, 107, 53, 0.2);
             border-bottom: none;
             width: 100%;
             max-width: 100%;
             max-height: 90vh;
-            box-shadow: var(--neon-glow);
-            animation: slideUp 0.3s ease;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+            animation: fade-in-up 0.3s ease;
             display: flex;
             flex-direction: column;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
         }
 
         .modal-header {
             text-align: center;
             margin-bottom: 1rem;
             padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(255, 107, 53, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .modal-header h2 {
             font-family: 'Orbitron', sans-serif;
             color: var(--secondary);
-            font-size: 1.3rem;
-        }
-
-        .modal-header p {
-            color: #888;
-            font-size: 0.9rem;
-            margin-top: 0.3rem;
+            font-size: 1.2rem;
         }
 
         .chat-modal .modal-content {
@@ -977,17 +1123,10 @@
             flex: 1;
             overflow-y: auto;
             padding: 1rem;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.2);
             border-radius: 12px;
             margin-bottom: 1rem;
             min-height: 0;
-        }
-
-        .chat-input-container {
-            display: flex;
-            gap: 0.5rem;
-            padding-top: 0.5rem;
-            border-top: 1px solid rgba(255, 107, 53, 0.2);
         }
 
         .image-modal {
@@ -1013,6 +1152,7 @@
             max-height: 80vh;
             object-fit: contain;
             border-radius: 8px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
         }
 
         .image-modal-close {
@@ -1030,6 +1170,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        .image-modal-close:hover {
+            transform: rotate(90deg);
         }
 
         /* Notifications */
@@ -1047,16 +1192,11 @@
         .notification {
             padding: 1rem;
             background: var(--card);
-            border-left: 4px solid var(--success);
+            border-left: 3px solid var(--success);
             border-radius: 8px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-            animation: slideInRight 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            animation: fade-in-up 0.3s ease;
             width: 100%;
-        }
-
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
         }
 
         .notification.error { border-left-color: var(--danger); }
@@ -1066,12 +1206,12 @@
             font-weight: 700;
             margin-bottom: 0.2rem;
             font-family: 'Orbitron';
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .notification-message {
             font-size: 0.85rem;
-            color: #ccc;
+            color: rgba(255, 255, 255, 0.7);
         }
 
         /* Loading */
@@ -1096,9 +1236,9 @@
         }
 
         .loader {
-            width: 60px;
-            height: 60px;
-            border: 3px solid rgba(255, 107, 53, 0.3);
+            width: 50px;
+            height: 50px;
+            border: 2px solid rgba(255, 107, 53, 0.2);
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
@@ -1114,29 +1254,16 @@
                 padding: 2rem;
             }
 
-            .header-content {
-                padding: 0 1rem;
-            }
-
             .logo {
-                font-size: 2.2rem;
-            }
-
-            .btn {
-                padding: 0.8rem 1.5rem;
-                font-size: 0.9rem;
+                font-size: 2rem;
             }
 
             .hero {
-                padding: 4rem 2rem;
+                padding: 3rem 2rem;
             }
 
             .hero h1 {
-                font-size: 3.5rem;
-            }
-
-            .hero p {
-                font-size: 1.2rem;
+                font-size: 3rem;
             }
 
             .order-form-container {
@@ -1144,12 +1271,8 @@
                 gap: 2rem;
             }
 
-            .order-form {
-                padding: 2.5rem;
-            }
-
             .movie-poster-preview {
-                height: 400px;
+                height: 350px;
             }
 
             .preview-card {
@@ -1163,25 +1286,9 @@
                 align-items: center;
             }
 
-            .admin-header h1 {
-                font-size: 2rem;
-            }
-
-            .admin-actions {
-                width: auto;
-            }
-
-            .admin-actions .btn {
-                flex: none;
-            }
-
             .stats-dashboard {
                 grid-template-columns: repeat(4, 1fr);
-                gap: 1.5rem;
-            }
-
-            .stat-number {
-                font-size: 2rem;
+                gap: 1rem;
             }
 
             .orders-grid {
@@ -1205,15 +1312,14 @@
 
             .modal-content {
                 border-radius: 15px;
-                border: 2px solid var(--primary);
+                border: 1px solid rgba(255, 107, 53, 0.2);
                 max-width: 500px;
                 max-height: 90vh;
-                animation: fadeIn 0.3s ease;
             }
 
             .chat-modal .modal-content {
-                max-width: 700px;
-                height: 80vh;
+                max-width: 600px;
+                height: 70vh;
                 border-radius: 15px;
             }
 
@@ -1224,35 +1330,10 @@
                 width: 350px;
             }
 
-            .timeline-dot {
-                width: 40px;
-                height: 40px;
-                font-size: 1.2rem;
-            }
-
-            .timeline-label {
+            .marquee-item {
                 font-size: 0.85rem;
+                padding: 0 3rem;
             }
-
-            .recover-order-btn {
-                bottom: 30px;
-                left: 30px;
-                font-size: 0.9rem;
-            }
-        }
-
-        @media (hover: none) {
-            .btn:hover::before {
-                display: none;
-            }
-            
-            .btn:active {
-                transform: scale(0.98);
-            }
-        }
-
-        html {
-            -webkit-text-size-adjust: 100%;
         }
 
         * {
@@ -1266,7 +1347,7 @@
 
         .chat-messages::-webkit-scrollbar-thumb,
         .client-chat-messages::-webkit-scrollbar-thumb {
-            background: var(--primary);
+            background: rgba(255, 107, 53, 0.5);
             border-radius: 2px;
         }
     </style>
@@ -1277,12 +1358,11 @@
 
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loader"></div>
-        <div style="margin-top: 1.5rem; font-family: 'Orbitron'; color: var(--primary); font-size: 0.9rem;">INICIALIZANDO...</div>
+        <div style="margin-top: 1.5rem; font-family: 'Orbitron'; color: var(--primary); font-size: 0.9rem; opacity: 0.8;">Inicializando...</div>
     </div>
 
     <div class="notification-container" id="notificationContainer"></div>
 
-    <!-- Botão de recuperar pedido -->
     <button class="recover-order-btn" id="recoverOrderBtn" onclick="recoverMyOrder()">
         📦 Ver Meu Pedido
     </button>
@@ -1291,9 +1371,21 @@
         <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE" type="audio/wav">
     </audio>
 
+    <!-- LETREIRO ELEGANTE E SUAVE -->
+    <div class="marquee-container">
+        <div class="marquee-content">
+            <div class="marquee-item"><span class="icon">🎬</span> Arena Pedidos Pro <span class="marquee-divider">|</span></div>
+            <div class="marquee-item"><span class="icon">⚡</span> Sistema em Tempo Real <span class="marquee-divider">|</span></div>
+            <div class="marquee-item"><span class="icon">🎬</span> Arena Pedidos Pro <span class="marquee-divider">|</span></div>
+            <div class="marquee-item"><span class="icon">⚡</span> Sistema em Tempo Real <span class="marquee-divider">|</span></div>
+            <div class="marquee-item"><span class="icon">🎬</span> Arena Pedidos Pro <span class="marquee-divider">|</span></div>
+            <div class="marquee-item"><span class="icon">⚡</span> Sistema em Tempo Real <span class="marquee-divider">|</span></div>
+        </div>
+    </div>
+
     <header>
         <div class="header-content">
-            <div class="logo">ARENA <span style="color: var(--light);">PEDIDOS</span></div>
+            <div class="logo">ARENA <span style="color: rgba(255,255,255,0.9);">PEDIDOS</span></div>
             
             <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <div class="live-indicator" id="connectionStatus">
@@ -1354,12 +1446,12 @@
         <section id="home" class="section active">
             <div class="hero">
                 <h1>SISTEMA DE PEDIDOS</h1>
-                <p>Faça seu pedido e acompanhe em tempo real!</p>
+                <p>Faça seu pedido e acompanhe em tempo real</p>
             </div>
 
             <div class="order-form-container">
                 <div class="order-form">
-                    <h2 style="margin-bottom: 1.5rem; color: var(--secondary); font-family: 'Orbitron'; text-align: center; font-size: 1.3rem;">
+                    <h2 style="margin-bottom: 1.5rem; color: var(--secondary); font-family: 'Orbitron'; text-align: center; font-size: 1.2rem;">
                         📝 Novo Pedido
                     </h2>
                     <form id="orderForm" onsubmit="submitOrder(event)">
@@ -1368,9 +1460,11 @@
                             <input type="text" id="customerName" required placeholder="Como devemos te chamar?" oninput="updatePreview()">
                         </div>
                         
-                        <div class="form-group">
-                            <label>Filme/Série *</label>
-                            <input type="text" id="movieName" required placeholder="Qual conteúdo você procura?" oninput="updatePreview()">
+                        <div class="form-group tmdb-search-container">
+                            <label>Filme/Série * (Busca Inteligente TMDB)</label>
+                            <input type="text" id="movieName" required placeholder="Digite para buscar..." oninput="searchTMDB(this.value)" autocomplete="off">
+                            <div class="tmdb-results" id="tmdbResults"></div>
+                            <small style="color: rgba(255,255,255,0.4); font-size: 0.75rem; margin-top: 0.3rem; display: block;">Dica: Digite o nome e selecione da lista</small>
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
@@ -1422,9 +1516,9 @@
                             <div class="image-upload-container" id="imageUploadContainer" onclick="document.getElementById('movieImage').click()">
                                 <input type="file" id="movieImage" class="image-upload-input" accept="image/*" onchange="handleImageSelect(event)">
                                 <div class="upload-placeholder">
-                                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem; opacity: 0.5;">🖼️</div>
-                                    <p style="font-size: 0.9rem;">Clique para enviar</p>
-                                    <small style="color: #666; font-size: 0.75rem;">JPG, PNG (max 5MB)</small>
+                                    <div style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.4;">🖼️</div>
+                                    <p style="font-size: 0.9rem; color: rgba(255,255,255,0.6);">Clique para enviar</p>
+                                    <small style="color: rgba(255,255,255,0.4); font-size: 0.75rem;">JPG, PNG (max 5MB)</small>
                                 </div>
                                 <img class="upload-preview" id="imagePreview" alt="Preview">
                                 <button type="button" class="remove-image-btn" onclick="removeImage(event)">×</button>
@@ -1437,7 +1531,7 @@
                         </div>
 
                         <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1rem;" id="submitBtn">
-                            🚀 ENVIAR PEDIDO
+                            🚀 Enviar Pedido
                         </button>
                     </form>
                 </div>
@@ -1446,20 +1540,20 @@
                     <div class="preview-card">
                         <h3>👁️ Preview</h3>
                         <div class="movie-poster-preview" id="previewPoster">
-                            <span id="previewEmoji">🎬</span>
+                            <span id="previewEmoji" style="opacity: 0.3; font-size: 4rem;">🎬</span>
                             <img id="previewImage" style="display: none;">
                         </div>
                         <div class="preview-info">
-                            <h4 id="previewTitle" style="font-size: 1.1rem; margin-bottom: 0.5rem;">Aguardando...</h4>
+                            <h4 id="previewTitle" style="font-size: 1.1rem; margin-bottom: 0.5rem; color: rgba(255,255,255,0.9);">Aguardando...</h4>
                             <div style="margin-bottom: 0.5rem;">
-                                <span class="status-badge" style="display: none; margin-right: 0.3rem; font-size: 0.7rem;" id="previewYearTag">2024</span>
-                                <span class="status-badge" style="display: none; margin-right: 0.3rem; font-size: 0.7rem;" id="previewGenreTag">Ação</span>
+                                <span class="status-badge" style="display: none; margin-right: 0.3rem; font-size: 0.7rem; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);" id="previewYearTag">2024</span>
+                                <span class="status-badge" style="display: none; margin-right: 0.3rem; font-size: 0.7rem; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);" id="previewGenreTag">Ação</span>
                                 <span class="status-badge status-cancelled" style="display: none; font-size: 0.7rem;" id="previewPriorityTag">URGENTE</span>
                             </div>
-                            <p style="color: #888; margin-bottom: 0.3rem; font-size: 0.9rem;">
-                                <strong>De:</strong> <span id="previewCustomer">-</span>
+                            <p style="color: rgba(255,255,255,0.5); margin-bottom: 0.3rem; font-size: 0.9rem;">
+                                <strong style="color: rgba(255,255,255,0.7);">De:</strong> <span id="previewCustomer">-</span>
                             </p>
-                            <p style="color: #666; font-size: 0.85rem; line-height: 1.4;" id="previewObs">
+                            <p style="color: rgba(255,255,255,0.4); font-size: 0.85rem; line-height: 1.4;" id="previewObs">
                                 Preencha o formulário...
                             </p>
                         </div>
@@ -1468,7 +1562,7 @@
                     <!-- Status do Pedido -->
                     <div class="client-order-status" id="clientOrderStatus">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <h3 style="font-family: 'Orbitron'; color: var(--success); font-size: 1.1rem;">
+                            <h3 style="font-family: 'Orbitron'; color: var(--success); font-size: 1rem;">
                                 📦 Meu Pedido
                             </h3>
                             <button class="btn btn-warning" onclick="clearMyOrder()" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;">🗑 Limpar</button>
@@ -1476,8 +1570,8 @@
                         
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                             <div style="flex: 1; min-width: 0;">
-                                <div style="font-size: 1rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="clientMovieTitle">-</div>
-                                <div style="color: #888; font-size: 0.8rem;" id="clientOrderId">#000000</div>
+                                <div style="font-size: 1rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: rgba(255,255,255,0.9);" id="clientMovieTitle">-</div>
+                                <div style="color: rgba(255,255,255,0.4); font-size: 0.75rem;" id="clientOrderId">#000000</div>
                             </div>
                             <span class="status-badge" id="clientStatusBadge" style="margin-left: 0.5rem;">Pendente</span>
                         </div>
@@ -1503,9 +1597,9 @@
 
                         <!-- Chat -->
                         <div class="client-chat-container">
-                            <h4 style="margin-bottom: 0.8rem; color: var(--accent); font-size: 0.9rem;">💬 Chat com Admin</h4>
+                            <h4 style="margin-bottom: 0.8rem; color: var(--accent); font-size: 0.85rem;">💬 Chat com Admin</h4>
                             <div class="client-chat-messages" id="clientChatMessages">
-                                <div style="text-align: center; color: #666; padding: 1rem; font-size: 0.85rem;">
+                                <div style="text-align: center; color: rgba(255,255,255,0.4); padding: 1rem; font-size: 0.85rem;">
                                     Nenhuma mensagem ainda...
                                 </div>
                             </div>
@@ -1523,15 +1617,15 @@
         <section id="admin" class="section">
             <div class="admin-header">
                 <div>
-                    <h1>📊 Painel</h1>
-                    <p style="color: #888; font-size: 0.9rem;">Gerenciamento em tempo real</p>
+                    <h1>📊 Painel Administrativo</h1>
+                    <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">Gerenciamento em tempo real</p>
                 </div>
                 <div class="admin-actions">
                     <div class="live-indicator" style="margin-right: auto;">
                         <div class="live-dot"></div>
                         <span>AO VIVO</span>
                     </div>
-                    <button class="btn btn-glass" onclick="exportData()">📥 Exportar</button>
+                    <button class="btn btn-secondary" onclick="exportData()">📥 Exportar</button>
                     <button class="btn btn-secondary" onclick="logout()">Sair</button>
                 </div>
             </div>
@@ -1561,7 +1655,7 @@
                     <button class="filter-btn" onclick="filterOrders('pending')">Pendentes</button>
                     <button class="filter-btn" onclick="filterOrders('completed')">Concluídos</button>
                     <button class="filter-btn" onclick="filterOrders('cancelled')">Cancelados</button>
-                    <button class="filter-btn" onclick="filterOrders('urgent')" style="border-color: var(--danger); color: var(--danger);">🔥 Urgentes</button>
+                    <button class="filter-btn" onclick="filterOrders('urgent')" style="border-color: rgba(255, 42, 109, 0.5); color: var(--danger);">🔥 Urgentes</button>
                 </div>
                 <div class="search-container">
                     <input type="text" class="search-input" id="searchInput" placeholder="Buscar pedidos..." oninput="searchOrders()">
@@ -1569,9 +1663,9 @@
             </div>
 
             <div class="orders-grid" id="ordersGrid">
-                <div style="text-align: center; padding: 3rem 1rem; color: #666; grid-column: 1 / -1;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">📭</div>
-                    <h3 style="font-size: 1.1rem;">Aguardando pedidos...</h3>
+                <div style="text-align: center; padding: 3rem 1rem; color: rgba(255,255,255,0.4); grid-column: 1 / -1;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">📭</div>
+                    <h3 style="font-size: 1.1rem; font-weight: 400;">Aguardando pedidos...</h3>
                 </div>
             </div>
         </section>
@@ -1603,11 +1697,124 @@
         let myOrderId = null;
         let chatListeners = {};
 
+        // ===== CONFIGURAÇÃO TMDB =====
+        const TMDB_API_KEY = '75f121d37fe2d810eaa9b00f3839209e';
+        const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+        const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w200';
+        let tmdbSearchTimeout = null;
+
+        async function searchTMDB(query) {
+            const resultsContainer = document.getElementById('tmdbResults');
+            
+            if (!query || query.length < 3) {
+                resultsContainer.classList.remove('active');
+                return;
+            }
+
+            clearTimeout(tmdbSearchTimeout);
+            tmdbSearchTimeout = setTimeout(async () => {
+                try {
+                    const [moviesRes, tvRes] = await Promise.all([
+                        fetch(`${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&language=pt-BR&query=${encodeURIComponent(query)}&page=1&include_adult=false`),
+                        fetch(`${TMDB_BASE_URL}/search/tv?api_key=${TMDB_API_KEY}&language=pt-BR&query=${encodeURIComponent(query)}&page=1&include_adult=false`)
+                    ]);
+
+                    const movies = await moviesRes.json();
+                    const tv = await tvRes.json();
+
+                    const combined = [
+                        ...movies.results.map(m => ({ ...m, type: 'movie' })),
+                        ...tv.results.map(t => ({ ...t, type: 'tv', title: t.name, release_date: t.first_air_date }))
+                    ]
+                    .filter(item => item.poster_path)
+                    .sort((a, b) => b.popularity - a.popularity)
+                    .slice(0, 5);
+
+                    displayTMDBResults(combined);
+                } catch (error) {
+                    console.error('Erro TMDB:', error);
+                }
+            }, 500);
+        }
+
+        function displayTMDBResults(results) {
+            const container = document.getElementById('tmdbResults');
+            
+            if (results.length === 0) {
+                container.classList.remove('active');
+                return;
+            }
+
+            container.innerHTML = results.map(item => `
+                <div class="tmdb-item" onclick="selectTMDBItem(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+                    <img src="${TMDB_IMAGE_BASE}${item.poster_path}" alt="${item.title}" loading="lazy">
+                    <div class="tmdb-item-info">
+                        <h4>${item.title}</h4>
+                        <p>
+                            <span class="year">${item.release_date ? item.release_date.split('-')[0] : 'N/A'}</span> • 
+                            ${item.type === 'movie' ? '🎬 Filme' : '📺 Série'} • 
+                            ⭐ ${item.vote_average.toFixed(1)}
+                        </p>
+                    </div>
+                </div>
+            `).join('');
+
+            container.classList.add('active');
+        }
+
+        function selectTMDBItem(item) {
+            document.getElementById('movieName').value = item.title;
+            document.getElementById('movieYear').value = item.release_date ? item.release_date.split('-')[0] : '';
+            
+            const genreMap = {
+                28: 'Ação', 12: 'Aventura', 16: 'Animação', 35: 'Comédia',
+                80: 'Suspense', 99: 'Documentário', 18: 'Drama', 10751: 'Drama',
+                14: 'Ficção Científica', 27: 'Horror', 10749: 'Romance',
+                878: 'Ficção Científica', 53: 'Suspense', 10765: 'Ficção Científica',
+                10759: 'Ação', 10762: 'Animação', 10763: 'Documentário',
+                10764: 'Série', 10766: 'Série', 10767: 'Documentário'
+            };
+
+            if (item.genre_ids && item.genre_ids.length > 0) {
+                const genre = genreMap[item.genre_ids[0]] || 'Outro';
+                document.getElementById('movieGenre').value = genre;
+            }
+
+            if (item.poster_path) {
+                const imageUrl = `https://image.tmdb.org/t/p/w500${item.poster_path}`;
+                fetch(imageUrl)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            selectedImageBase64 = e.target.result;
+                            document.getElementById('imagePreview').src = e.target.result;
+                            document.getElementById('imageUploadContainer').classList.add('has-image');
+                            document.getElementById('previewImage').src = e.target.result;
+                            document.getElementById('previewImage').style.display = 'block';
+                            document.getElementById('previewEmoji').style.display = 'none';
+                            updatePreview();
+                        };
+                        reader.readAsDataURL(blob);
+                    });
+            }
+
+            document.getElementById('tmdbResults').classList.remove('active');
+            updatePreview();
+            showNotification('TMDB', 'Informações preenchidas!', 'success');
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.tmdb-search-container')) {
+                document.getElementById('tmdbResults').classList.remove('active');
+            }
+        });
+
         // ===== INICIALIZAÇÃO =====
         document.addEventListener('DOMContentLoaded', () => {
             initParticles();
             initFirebase();
-            checkSavedOrder(); // Verificar pedido salvo ao carregar
+            checkSavedOrder();
             setTimeout(() => {
                 document.getElementById('loadingOverlay').classList.add('hidden');
             }, 800);
@@ -1643,13 +1850,10 @@
                     const orderData = JSON.parse(savedOrderData);
                     myOrderId = savedOrderId;
                     
-                    // Mostrar botão flutuante
                     document.getElementById('recoverOrderBtn').classList.add('show');
                     
-                    // Restaurar visualização automaticamente
                     restoreClientOrder(orderData, myOrderId);
                     
-                    // Iniciar listeners
                     initClientChat(myOrderId);
                     
                     showNotification('Pedido Recuperado', 'Seu pedido anterior foi carregado!', 'success');
@@ -1668,7 +1872,6 @@
             document.getElementById('clientOrderId').textContent = `#${orderId.substr(-6).toUpperCase()}`;
             updateClientStatusUI(order.status || 'pending');
             
-            // Scroll para o status após um momento
             setTimeout(() => {
                 statusDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }, 500);
@@ -1679,7 +1882,6 @@
                 const statusDiv = document.getElementById('clientOrderStatus');
                 statusDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 
-                // Recarregar dados atualizados do Firebase
                 ordersRef.child(myOrderId).once('value', (snapshot) => {
                     const order = snapshot.val();
                     if (order) {
@@ -1695,14 +1897,11 @@
             
             clearOrderStorage();
             
-            // Esconder status
             document.getElementById('clientOrderStatus').classList.remove('active');
             document.getElementById('recoverOrderBtn').classList.remove('show');
             
-            // Limpar chat
-            document.getElementById('clientChatMessages').innerHTML = '<div style="text-align: center; color: #666; padding: 1rem; font-size: 0.85rem;">Nenhuma mensagem ainda...</div>';
+            document.getElementById('clientChatMessages').innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.4); padding: 1rem; font-size: 0.85rem;">Nenhuma mensagem ainda...</div>';
             
-            // Remover listeners
             if (chatListeners.client) {
                 chatsRef.child(chatListeners.client).off();
                 ordersRef.child(chatListeners.client).off();
@@ -1732,16 +1931,16 @@
             canvas.height = window.innerHeight;
 
             const particles = [];
-            const count = window.innerWidth < 768 ? 25 : 50;
+            const count = window.innerWidth < 768 ? 20 : 40;
 
             for (let i = 0; i < count; i++) {
                 particles.push({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height,
-                    vx: (Math.random() - 0.5) * 0.5,
-                    vy: (Math.random() - 0.5) * 0.5,
-                    size: Math.random() * 2,
-                    color: Math.random() > 0.5 ? 'rgba(255, 107, 53, 0.5)' : 'rgba(0, 212, 255, 0.5)'
+                    vx: (Math.random() - 0.5) * 0.3,
+                    vy: (Math.random() - 0.5) * 0.3,
+                    size: Math.random() * 1.5,
+                    color: Math.random() > 0.5 ? 'rgba(255, 107, 53, 0.3)' : 'rgba(0, 212, 255, 0.3)'
                 });
             }
 
@@ -1881,18 +2080,16 @@
                 .then(() => {
                     myOrderId = newOrderRef.key;
                     
-                    // Salvar no localStorage para persistência
                     saveOrderToStorage(myOrderId, orderData);
                     
-                    // Mostrar botão flutuante
                     document.getElementById('recoverOrderBtn').classList.add('show');
                     
                     showClientOrderStatus(orderData, myOrderId);
                     initClientChat(myOrderId);
                     
-                    btn.innerHTML = '✅ ENVIADO!';
+                    btn.innerHTML = '✅ Enviado!';
                     setTimeout(() => {
-                        btn.innerHTML = '🚀 ENVIAR PEDIDO';
+                        btn.innerHTML = '🚀 Enviar Pedido';
                         btn.disabled = false;
                         document.getElementById('orderForm').reset();
                         removeImage({ stopPropagation: () => {} });
@@ -1957,19 +2154,16 @@
             
             chatListeners.client = orderId;
             
-            // Listener de mensagens
             chatsRef.child(orderId).on('value', (snapshot) => {
                 const messages = snapshot.val();
                 renderClientChat(messages);
             });
             
-            // Listener de status do pedido
             ordersRef.child(orderId).on('value', (snapshot) => {
                 const order = snapshot.val();
                 if (order) {
                     updateClientStatusUI(order.status);
                     
-                    // Atualizar dados salvos
                     const savedData = localStorage.getItem('myOrderData');
                     if (savedData) {
                         const parsed = JSON.parse(savedData);
@@ -1990,7 +2184,7 @@
             const container = document.getElementById('clientChatMessages');
             
             if (!messages || Object.keys(messages).length === 0) {
-                container.innerHTML = '<div style="text-align: center; color: #666; padding: 1rem; font-size: 0.85rem;">Nenhuma mensagem ainda...</div>';
+                container.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.4); padding: 1rem; font-size: 0.85rem;">Nenhuma mensagem ainda...</div>';
                 return;
             }
             
@@ -2093,9 +2287,9 @@
             
             if (filtered.length === 0) {
                 grid.innerHTML = `
-                    <div style="text-align: center; padding: 3rem 1rem; color: #666; grid-column: 1 / -1;">
-                        <div style="font-size: 3rem; margin-bottom: 1rem;">📭</div>
-                        <h3 style="font-size: 1.1rem;">Nenhum pedido encontrado</h3>
+                    <div style="text-align: center; padding: 3rem 1rem; color: rgba(255,255,255,0.4); grid-column: 1 / -1;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">📭</div>
+                        <h3 style="font-size: 1.1rem; font-weight: 400;">Nenhum pedido encontrado</h3>
                     </div>
                 `;
                 return;
@@ -2106,10 +2300,10 @@
                     <div class="order-card-header">
                         <div>
                             <div class="order-id">#${order.id.substr(-6).toUpperCase()}</div>
-                            <div style="font-size: 0.8rem; color: #666;">${order.date}</div>
+                            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4);">${order.date}</div>
                         </div>
                         <div style="display: flex; gap: 0.3rem; align-items: center;">
-                            ${order.priority === 'urgente' ? '<span style="font-size: 1.2rem;">🔥</span>' : ''}
+                            ${order.priority === 'urgente' ? '<span style="font-size: 1rem;">🔥</span>' : ''}
                             ${order.hasNewMessage ? '<span style="background: var(--danger); color: white; padding: 0.15rem 0.4rem; border-radius: 8px; font-size: 0.65rem; font-weight: bold;">NOVO</span>' : ''}
                         </div>
                     </div>
@@ -2118,16 +2312,16 @@
                         <div class="order-image-container" onclick="openImageModal('${order.imageUrl || ''}')">
                             ${order.imageUrl ? 
                                 `<img src="${order.imageUrl}" alt="Capa" loading="lazy">` : 
-                                '<div style="height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; opacity: 0.3;">🎬</div>'
+                                '<div style="height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; opacity: 0.2;">🎬</div>'
                             }
                         </div>
                         
                         <div class="order-movie-title">${escapeHtml(order.movie)}</div>
-                        <div class="order-customer">👤 ${escapeHtml(order.customer)}</div>
+                        <div class="order-customer" style="color: rgba(255,255,255,0.6);">👤 ${escapeHtml(order.customer)}</div>
                         
                         <div class="order-meta">
-                            <span class="status-badge" style="font-size: 0.7rem;">${order.year}</span>
-                            <span class="status-badge" style="font-size: 0.7rem;">${order.genre}</span>
+                            <span class="status-badge" style="font-size: 0.7rem; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);">${order.year}</span>
+                            <span class="status-badge" style="font-size: 0.7rem; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);">${order.genre}</span>
                         </div>
                         
                         ${order.observations !== 'Nenhuma' ? `
@@ -2143,7 +2337,7 @@
                                 <button class="btn-icon btn-complete" onclick="updateStatus('${order.id}', 'completed')" title="Concluir">✓</button>
                                 <button class="btn-icon btn-cancel" onclick="updateStatus('${order.id}', 'cancelled')" title="Cancelar">✕</button>
                             ` : ''}
-                            <button class="btn-icon btn-delete" onclick="deleteOrder('${order.id}')" title="Excluir">🗑</button>
+                            <button class="btn-icon btn-delete" onclick="deleteOrder('${order.id}')" title="Excluir" style="background: rgba(255,255,255,0.1); color: var(--danger);">🗑</button>
                         </div>
                     </div>
                 </div>
@@ -2189,7 +2383,7 @@
             const container = document.getElementById('chatMessages');
             
             if (!messages || Object.keys(messages).length === 0) {
-                container.innerHTML = '<div style="text-align: center; color: #666; padding: 2rem;">Nenhuma mensagem. Inicie a conversa!</div>';
+                container.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.4); padding: 2rem;">Nenhuma mensagem. Inicie a conversa!</div>';
                 return;
             }
             
