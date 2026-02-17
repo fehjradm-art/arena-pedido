@@ -6,7 +6,6 @@
     <title>ARENA PEDIDOS - Sistema de Pedidos de Filmes e Séries</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -330,29 +329,12 @@
             font-size: 1.2rem;
             display: none;
             z-index: 10;
-        }
-
-        .image-upload-container.has-image .remove-image-btn {
-            display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .upload-progress {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: rgba(0,0,0,0.3);
-            display: none;
-        }
-
-        .upload-progress-bar {
-            height: 100%;
-            background: var(--success);
-            width: 0%;
-            transition: width 0.3s ease;
+        .image-upload-container.has-image .remove-image-btn {
+            display: flex;
         }
 
         .popular-movies {
@@ -369,7 +351,7 @@
 
         .movies-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 1.5rem;
         }
 
@@ -380,6 +362,7 @@
             transition: all 0.3s ease;
             cursor: pointer;
             border: 2px solid transparent;
+            position: relative;
         }
 
         .movie-card:hover {
@@ -390,35 +373,62 @@
 
         .movie-poster {
             width: 100%;
-            height: 280px;
+            height: 260px;
             background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3rem;
             position: relative;
             overflow: hidden;
         }
 
-        .movie-poster::before {
-            content: '🎬';
+        .movie-poster img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .movie-card:hover .movie-poster img {
+            transform: scale(1.05);
+        }
+
+        .movie-poster-fallback {
             font-size: 4rem;
             opacity: 0.3;
         }
 
         .movie-info {
             padding: 1rem;
+            background: var(--gray);
         }
 
         .movie-title {
             font-weight: 700;
             margin-bottom: 0.5rem;
             color: var(--light);
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .movie-year {
             color: #888;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+        }
+
+        .movie-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--primary);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
         }
 
         .admin-header {
@@ -787,10 +797,9 @@
             color: #666;
         }
 
-        /* Imagem no painel admin */
         .order-image-thumb {
-            width: 60px;
-            height: 80px;
+            width: 50px;
+            height: 70px;
             object-fit: cover;
             border-radius: 4px;
             cursor: pointer;
@@ -857,6 +866,10 @@
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+
+            .movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
         }
 
         .loading-spinner {
@@ -922,7 +935,7 @@
 
     <div class="image-modal" id="imageModal" onclick="closeImageModal()">
         <button class="image-modal-close">&times;</button>
-        <img id="modalImage" src="" alt="Capa do conteúdo">
+        <img id="modalImage" src="" alt="Capa">
     </div>
 
     <div class="container">
@@ -983,9 +996,6 @@
                             </div>
                             <img class="upload-preview" id="imagePreview" alt="Preview">
                             <button type="button" class="remove-image-btn" onclick="removeImage(event)">×</button>
-                            <div class="upload-progress">
-                                <div class="upload-progress-bar" id="uploadProgressBar"></div>
-                            </div>
                         </div>
                     </div>
 
@@ -1092,29 +1102,89 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const storage = firebase.storage();
         const ordersRef = db.ref('arena-pedidos');
-        const imagesRef = storage.ref('movie-images');
 
         const ADMIN_PASSWORD = 'arena2024';
         let isAuthenticated = false;
         let currentFilter = 'all';
         let soundEnabled = true;
         let localOrders = [];
-        let selectedImageFile = null;
         let selectedImageBase64 = null;
 
+        // Filmes/Séries com URLs de imagens reais (TMDB)
         const popularMovies = [
-            { title: 'Duna: Parte 2', year: '2024', genre: 'Ficção Científica' },
-            { title: 'Oppenheimer', year: '2023', genre: 'Drama' },
-            { title: 'Poor Things', year: '2023', genre: 'Comédia/Drama' },
-            { title: 'Wicked', year: '2024', genre: 'Musical' },
-            { title: 'Gladiador 2', year: '2024', genre: 'Ação' },
-            { title: 'Coringa 2', year: '2024', genre: 'Drama/Musical' },
-            { title: 'Deadpool & Wolverine', year: '2024', genre: 'Ação' },
-            { title: 'Divertida Mente 2', year: '2024', genre: 'Animação' },
-            { title: 'The Last of Us', year: '2023', genre: 'Série' },
-            { title: 'House of the Dragon', year: '2022', genre: 'Série' }
+            { 
+                title: 'Duna: Parte 2', 
+                year: '2024', 
+                genre: 'Ficção Científica',
+                image: 'https://image.tmdb.org/t/p/w500/8b8R8l88Qje9dn9OE8PY05Nxl1X.jpg'
+            },
+            { 
+                title: 'Oppenheimer', 
+                year: '2023', 
+                genre: 'Drama',
+                image: 'https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg'
+            },
+            { 
+                title: 'Poor Things', 
+                year: '2023', 
+                genre: 'Comédia/Drama',
+                image: 'https://image.tmdb.org/t/p/w500/kCGlIMHnOm8JPXq3rXM6c5wMxcT.jpg'
+            },
+            { 
+                title: 'Wicked', 
+                year: '2024', 
+                genre: 'Musical',
+                image: 'https://image.tmdb.org/t/p/w500/2E1x1qcHqGZcA9ArRLsH1Q8Z2rV.jpg'
+            },
+            { 
+                title: 'Gladiador 2', 
+                year: '2024', 
+                genre: 'Ação',
+                image: 'https://image.tmdb.org/t/p/w500/2cxhvwyEwRlysAmRH4iodkvo0z5.jpg'
+            },
+            { 
+                title: 'Coringa: Delírio a Dois', 
+                year: '2024', 
+                genre: 'Drama/Musical',
+                image: 'https://image.tmdb.org/t/p/w500/if4Q0NAv7I5k6X9Z1H6k5Y3G4vQ.jpg'
+            },
+            { 
+                title: 'Deadpool & Wolverine', 
+                year: '2024', 
+                genre: 'Ação',
+                image: 'https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6ESMHiMg.jpg'
+            },
+            { 
+                title: 'Divertida Mente 2', 
+                year: '2024', 
+                genre: 'Animação',
+                image: 'https://image.tmdb.org/t/p/w500/xeqXXTE1Cd3qNaE25B81iBbLGdx.jpg'
+            },
+            { 
+                title: 'The Last of Us', 
+                year: '2023', 
+                genre: 'Série',
+                image: 'https://image.tmdb.org/t/p/w500/uKvVjHNqB5VmOrdxqAt2F7J78ED.jpg'
+            },
+            { 
+                title: 'House of the Dragon', 
+                year: '2022', 
+                genre: 'Série',
+                image: 'https://image.tmdb.org/t/p/w500/7QMsOTMUswlwxI0fCJzXWQ8Fm6w.jpg'
+            },
+            { 
+                title: 'The Witcher', 
+                year: '2019', 
+                genre: 'Série',
+                image: 'https://image.tmdb.org/t/p/w500/cZ0d3rtvXPVvuiX22sP79K3HmjZ.jpg'
+            },
+            { 
+                title: 'Stranger Things', 
+                year: '2016', 
+                genre: 'Série',
+                image: 'https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg'
+            }
         ];
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -1130,10 +1200,13 @@
             const grid = document.getElementById('popularMovies');
             grid.innerHTML = popularMovies.map(movie => `
                 <div class="movie-card" onclick="fillForm('${movie.title}', '${movie.year}', '${movie.genre}')">
-                    <div class="movie-poster"></div>
+                    <div class="movie-poster">
+                        <img src="${movie.image}" alt="${movie.title}" loading="lazy" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'movie-poster-fallback\'>🎬</div>';">
+                        <span class="movie-badge">${movie.genre === 'Série' ? 'SÉRIE' : 'FILME'}</span>
+                    </div>
                     <div class="movie-info">
                         <div class="movie-title">${movie.title}</div>
-                        <div class="movie-year">${movie.year} • ${movie.genre}</div>
+                        <div class="movie-year">${movie.year}</div>
                     </div>
                 </div>
             `).join('');
@@ -1186,7 +1259,6 @@
                 return;
             }
 
-            selectedImageFile = file;
             const reader = new FileReader();
             
             reader.onload = (e) => {
@@ -1198,12 +1270,16 @@
                 container.classList.add('has-image');
             };
 
+            reader.onerror = () => {
+                showNotification('❌ Erro ao ler imagem.', 'error');
+                selectedImageBase64 = null;
+            };
+
             reader.readAsDataURL(file);
         }
 
         function removeImage(event) {
             event.stopPropagation();
-            selectedImageFile = null;
             selectedImageBase64 = null;
             
             document.getElementById('movieImage').value = '';
@@ -1211,51 +1287,18 @@
             document.getElementById('imageUploadContainer').classList.remove('has-image');
         }
 
-        async function uploadImage(file, orderId) {
-            if (!file) return null;
-            
-            try {
-                const fileName = `order_${orderId}_${Date.now()}.jpg`;
-                const fileRef = imagesRef.child(fileName);
-                
-                const snapshot = await fileRef.put(file);
-                const downloadURL = await snapshot.ref.getDownloadURL();
-                
-                return downloadURL;
-            } catch (error) {
-                console.error('Erro upload imagem:', error);
-                return null;
-            }
-        }
-
         // ===== ENVIO DE PEDIDO =====
-        async function submitOrder(e) {
+        function submitOrder(e) {
             e.preventDefault();
+            
             const btn = document.getElementById('submitBtn');
+            const originalText = btn.innerHTML;
+            
             btn.innerHTML = '<div class="loading-spinner"></div> Enviando...';
             btn.disabled = true;
 
-            const orderId = Date.now();
-            const progressBar = document.getElementById('uploadProgressBar');
-            const progressContainer = document.querySelector('.upload-progress');
-
-            let imageUrl = null;
-            
-            if (selectedImageFile) {
-                progressContainer.style.display = 'block';
-                progressBar.style.width = '50%';
-                
-                imageUrl = await uploadImage(selectedImageFile, orderId);
-                
-                progressBar.style.width = '100%';
-                setTimeout(() => {
-                    progressContainer.style.display = 'none';
-                    progressBar.style.width = '0%';
-                }, 500);
-            }
-
             const order = {
-                id: orderId,
+                id: Date.now(),
                 timestamp: Date.now(),
                 date: new Date().toLocaleString('pt-BR'),
                 customer: document.getElementById('customerName').value,
@@ -1263,13 +1306,13 @@
                 year: document.getElementById('movieYear').value || 'N/A',
                 genre: document.getElementById('movieGenre').value || 'Não especificado',
                 observations: document.getElementById('observations').value || 'Nenhuma',
-                imageUrl: imageUrl,
+                imageUrl: selectedImageBase64,
                 status: 'pending'
             };
 
             ordersRef.push(order)
                 .then(() => {
-                    btn.innerHTML = '🚀 Enviar Pedido';
+                    btn.innerHTML = originalText;
                     btn.disabled = false;
                     document.getElementById('orderForm').reset();
                     removeImage({ stopPropagation: () => {} });
@@ -1277,7 +1320,7 @@
                 })
                 .catch((error) => {
                     console.error('Erro:', error);
-                    btn.innerHTML = '🚀 Enviar Pedido';
+                    btn.innerHTML = originalText;
                     btn.disabled = false;
                     showNotification('❌ Erro ao enviar. Tente novamente.', 'error');
                 });
@@ -1391,7 +1434,7 @@
                     <td>
                         ${order.imageUrl ? 
                             `<img src="${order.imageUrl}" class="order-image-thumb" onclick="openImageModal('${order.imageUrl}')" alt="Capa">` : 
-                            '<span style="color: #666; font-size: 0.85rem;">Sem imagem</span>'
+                            '<span style="color: #666; font-size: 0.85rem;">-</span>'
                         }
                     </td>
                     <td><span class="status-badge status-${order.status}">${getStatusText(order.status)}</span></td>
@@ -1413,12 +1456,6 @@
                                 <span class="detail-label">ID:</span>
                                 <span class="detail-value">#${order.id}</span>
                             </div>
-                            ${order.imageUrl ? `
-                                <div class="detail-row">
-                                    <span class="detail-label">Imagem:</span>
-                                    <span class="detail-value"><a href="${order.imageUrl}" target="_blank" style="color: var(--primary);">Ver capa em tamanho real</a></span>
-                                </div>
-                            ` : ''}
                         </div>
                     </td>
                 </tr>
@@ -1448,15 +1485,6 @@
         function deleteOrder(key) {
             if (!confirm('⚠️ Tem certeza que deseja EXCLUIR este pedido permanentemente?')) return;
             
-            const order = localOrders.find(o => o.firebaseKey === key);
-            if (order && order.imageUrl) {
-                // Extrair nome do arquivo da URL e deletar do Storage
-                try {
-                    const fileName = order.imageUrl.split('%2F').pop().split('?')[0];
-                    imagesRef.child(fileName).delete().catch(() => {});
-                } catch (e) {}
-            }
-            
             ordersRef.child(key).remove()
                 .then(() => showNotification('Pedido excluído!', 'warning'))
                 .catch(() => showNotification('Erro ao excluir', 'error'));
@@ -1467,13 +1495,7 @@
             if (!confirm('Última chance! Deseja mesmo apagar todo o histórico?')) return;
 
             ordersRef.remove()
-                .then(() => {
-                    // Limpar storage também
-                    imagesRef.listAll().then(result => {
-                        result.items.forEach(file => file.delete());
-                    });
-                    showNotification('Todos os pedidos foram apagados!', 'warning');
-                })
+                .then(() => showNotification('Todos os pedidos foram apagados!', 'warning'))
                 .catch(() => showNotification('Erro ao limpar pedidos', 'error'));
         }
 
