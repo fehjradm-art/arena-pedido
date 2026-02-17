@@ -337,98 +337,19 @@
             display: flex;
         }
 
-        .popular-movies {
-            margin-top: 3rem;
-        }
-
-        .section-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2rem;
-            margin-bottom: 2rem;
+        /* Footer */
+        .footer {
             text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+            border-top: 1px solid rgba(255, 107, 53, 0.2);
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .footer strong {
             color: var(--secondary);
-        }
-
-        .movies-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .movie-card {
-            background: var(--gray);
-            border-radius: 12px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: 2px solid transparent;
-            position: relative;
-        }
-
-        .movie-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.3);
-        }
-
-        .movie-poster {
-            width: 100%;
-            height: 260px;
-            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .movie-poster img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-
-        .movie-card:hover .movie-poster img {
-            transform: scale(1.05);
-        }
-
-        .movie-poster-fallback {
-            font-size: 4rem;
-            opacity: 0.3;
-        }
-
-        .movie-info {
-            padding: 1rem;
-            background: var(--gray);
-        }
-
-        .movie-title {
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: var(--light);
-            font-size: 0.95rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .movie-year {
-            color: #888;
-            font-size: 0.85rem;
-        }
-
-        .movie-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: var(--primary);
-            color: white;
-            padding: 0.3rem 0.6rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
+            font-family: 'Orbitron', sans-serif;
         }
 
         .admin-header {
@@ -866,10 +787,6 @@
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-
-            .movies-grid {
-                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            }
         }
 
         .loading-spinner {
@@ -886,6 +803,7 @@
             to { transform: rotate(360deg); }
         }
     </style>
+<base target="_blank">
 </head>
 <body>
     <div class="bg-animation"></div>
@@ -1010,9 +928,8 @@
                 </form>
             </div>
 
-            <div class="popular-movies">
-                <h2 class="section-title">🍿 Clique para sugerir</h2>
-                <div class="movies-grid" id="popularMovies"></div>
+            <div class="footer">
+                <p>Desenvolvido por <strong>ARENA TV</strong></p>
             </div>
         </section>
 
@@ -1085,6 +1002,10 @@
                     </tbody>
                 </table>
             </div>
+
+            <div class="footer">
+                <p>Desenvolvido por <strong>ARENA TV</strong></p>
+            </div>
         </section>
     </div>
 
@@ -1111,106 +1032,13 @@
         let localOrders = [];
         let selectedImageBase64 = null;
 
-        // Filmes/Séries com URLs de imagens reais (TMDB)
-        const popularMovies = [
-            { 
-                title: 'Duna: Parte 2', 
-                year: '2024', 
-                genre: 'Ficção Científica',
-                image: 'https://image.tmdb.org/t/p/w500/8b8R8l88Qje9dn9OE8PY05Nxl1X.jpg'
-            },
-            { 
-                title: 'Oppenheimer', 
-                year: '2023', 
-                genre: 'Drama',
-                image: 'https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg'
-            },
-            { 
-                title: 'Poor Things', 
-                year: '2023', 
-                genre: 'Comédia/Drama',
-                image: 'https://image.tmdb.org/t/p/w500/kCGlIMHnOm8JPXq3rXM6c5wMxcT.jpg'
-            },
-            { 
-                title: 'Wicked', 
-                year: '2024', 
-                genre: 'Musical',
-                image: 'https://image.tmdb.org/t/p/w500/2E1x1qcHqGZcA9ArRLsH1Q8Z2rV.jpg'
-            },
-            { 
-                title: 'Gladiador 2', 
-                year: '2024', 
-                genre: 'Ação',
-                image: 'https://image.tmdb.org/t/p/w500/2cxhvwyEwRlysAmRH4iodkvo0z5.jpg'
-            },
-            { 
-                title: 'Coringa: Delírio a Dois', 
-                year: '2024', 
-                genre: 'Drama/Musical',
-                image: 'https://image.tmdb.org/t/p/w500/if4Q0NAv7I5k6X9Z1H6k5Y3G4vQ.jpg'
-            },
-            { 
-                title: 'Deadpool & Wolverine', 
-                year: '2024', 
-                genre: 'Ação',
-                image: 'https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6ESMHiMg.jpg'
-            },
-            { 
-                title: 'Divertida Mente 2', 
-                year: '2024', 
-                genre: 'Animação',
-                image: 'https://image.tmdb.org/t/p/w500/xeqXXTE1Cd3qNaE25B81iBbLGdx.jpg'
-            },
-            { 
-                title: 'The Last of Us', 
-                year: '2023', 
-                genre: 'Série',
-                image: 'https://image.tmdb.org/t/p/w500/uKvVjHNqB5VmOrdxqAt2F7J78ED.jpg'
-            },
-            { 
-                title: 'House of the Dragon', 
-                year: '2022', 
-                genre: 'Série',
-                image: 'https://image.tmdb.org/t/p/w500/7QMsOTMUswlwxI0fCJzXWQ8Fm6w.jpg'
-            },
-            { 
-                title: 'The Witcher', 
-                year: '2019', 
-                genre: 'Série',
-                image: 'https://image.tmdb.org/t/p/w500/cZ0d3rtvXPVvuiX22sP79K3HmjZ.jpg'
-            },
-            { 
-                title: 'Stranger Things', 
-                year: '2016', 
-                genre: 'Série',
-                image: 'https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg'
-            }
-        ];
-
         document.addEventListener('DOMContentLoaded', () => {
-            initPopularMovies();
             initFirebase();
             
             if (sessionStorage.getItem('adminAuth') === 'true') {
                 isAuthenticated = true;
             }
         });
-
-        function initPopularMovies() {
-            const grid = document.getElementById('popularMovies');
-            grid.innerHTML = popularMovies.map(movie => `
-                <div class="movie-card" onclick="fillForm('${movie.title}', '${movie.year}', '${movie.genre}')">
-                    <div class="movie-poster">
-                        <img src="${movie.image}" alt="${movie.title}" loading="lazy" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'movie-poster-fallback\'>🎬</div>';">
-                        <span class="movie-badge">${movie.genre === 'Série' ? 'SÉRIE' : 'FILME'}</span>
-                    </div>
-                    <div class="movie-info">
-                        <div class="movie-title">${movie.title}</div>
-                        <div class="movie-year">${movie.year}</div>
-                    </div>
-                </div>
-            `).join('');
-        }
 
         function initFirebase() {
             try {
@@ -1239,14 +1067,6 @@
                 document.getElementById('connectionStatus').innerHTML = '<div class="status-dot" style="background: var(--warning);"></div><span>Erro</span>';
                 showNotification('❌ Erro na conexão.', 'error');
             }
-        }
-
-        function fillForm(title, year, genre) {
-            document.getElementById('movieName').value = title;
-            document.getElementById('movieYear').value = year;
-            document.getElementById('movieGenre').value = genre;
-            showNotification('Conteúdo selecionado! Complete seu pedido.', 'success');
-            document.querySelector('.order-form').scrollIntoView({ behavior: 'smooth' });
         }
 
         // ===== UPLOAD DE IMAGEM =====
